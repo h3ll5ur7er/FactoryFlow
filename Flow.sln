@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flow.App", "Flow.App\Flow.App.csproj", "{27812F0A-32E2-45A9-BBD5-9C41555D49C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flow.Core", "Flow.Core\Flow.Core.csproj", "{95C1B357-F654-45E3-BE75-C2E935136F05}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flow.Tests", "Flow.Tests\Flow.Tests.csproj", "{E1EE1AB1-75C2-4689-839F-FBA6C230BD81}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{27812F0A-32E2-45A9-BBD5-9C41555D49C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27812F0A-32E2-45A9-BBD5-9C41555D49C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27812F0A-32E2-45A9-BBD5-9C41555D49C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27812F0A-32E2-45A9-BBD5-9C41555D49C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95C1B357-F654-45E3-BE75-C2E935136F05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95C1B357-F654-45E3-BE75-C2E935136F05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95C1B357-F654-45E3-BE75-C2E935136F05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95C1B357-F654-45E3-BE75-C2E935136F05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1EE1AB1-75C2-4689-839F-FBA6C230BD81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1EE1AB1-75C2-4689-839F-FBA6C230BD81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1EE1AB1-75C2-4689-839F-FBA6C230BD81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1EE1AB1-75C2-4689-839F-FBA6C230BD81}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

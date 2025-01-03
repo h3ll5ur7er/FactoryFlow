@@ -1,0 +1,33 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Flow.App.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Flow.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Flow">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <StackPanel Spacing="20" Margin="20">
+        <TextBlock Text="Welcome to Flow" 
+                 HorizontalAlignment="Center"
+                 FontSize="24"/>
+                 
+        <TextBox Text="{Binding Name}"
+                 Watermark="Enter your name"
+                 Width="200"
+                 HorizontalAlignment="Center"/>
+                 
+        <Button Content="Get Greeting"
+                Command="{Binding UpdateGreetingCommand}"
+                HorizontalAlignment="Center"/>
+                
+        <TextBlock Text="{Binding Greeting}"
+                 HorizontalAlignment="Center"
+                 FontSize="18"/>
+    </StackPanel>
+</Window> 
