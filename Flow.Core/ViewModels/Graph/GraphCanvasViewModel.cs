@@ -8,51 +8,47 @@ using Flow.Core.Services;
 
 namespace Flow.ViewModels.Graph;
 
-public partial class GraphCanvasViewModel : ViewModelBase
+public partial class GraphCanvasViewModel : ObservableObject
 {
     private readonly INodeFactory _nodeFactory;
     private readonly IGraphManager _graphManager;
+    private readonly IGameRegistry _gameRegistry;
 
     [ObservableProperty]
     private NodeViewModel? _selectedNode;
 
     public ObservableCollection<NodeViewModel> Nodes { get; } = new();
 
-    public GraphCanvasViewModel(INodeFactory nodeFactory, IGraphManager graphManager)
+    public List<Recipe> AvailableRecipes => _gameRegistry.Recipes.ToList();
+
+    public GraphCanvasViewModel(INodeFactory nodeFactory, IGraphManager graphManager, IGameRegistry gameRegistry)
     {
         _nodeFactory = nodeFactory;
         _graphManager = graphManager;
+        _gameRegistry = gameRegistry;
     }
 
     [RelayCommand]
-    private void AddRecipeNode()
+    private void AddRecipeNode(Recipe recipe)
     {
-        var testItem = new Item("test_item", "Test Item");
-        var input = new ItemStack(testItem, 1);
-        var output = new ItemStack(testItem, 1);
-        var machine = new Machine("test_machine", "Test Machine", 100);
-        var recipe = new Recipe(
-            "test_recipe",
-            "Test Recipe",
-            new[] { input },
-            new[] { output },
-            machine,
-            TimeSpan.FromSeconds(1));
         var node = _nodeFactory.CreateRecipeNode(recipe, _graphManager);
+        node.Position = _contextMenuPosition;
         _graphManager.AddNode(node);
     }
 
     [RelayCommand]
-    private void AddGenericNode()
+    private void AddGenericNode(Point position)
     {
         var node = _nodeFactory.CreateNode(NodeType.Generic, _graphManager);
+        node.Position = position;
         _graphManager.AddNode(node);
     }
 
     [RelayCommand]
-    private void AddSplergerNode()
+    private void AddSplergerNode(Point position)
     {
         var node = _nodeFactory.CreateNode(NodeType.Splerger, _graphManager);
+        node.Position = position;
         _graphManager.AddNode(node);
     }
 
@@ -66,8 +62,9 @@ public partial class GraphCanvasViewModel : ViewModelBase
         Nodes.Remove(node);
     }
 
-    public void Clear()
+    private Point _contextMenuPosition;
+    public void SetContextMenuPosition(Point position)
     {
-        Nodes.Clear();
+        _contextMenuPosition = position;
     }
 } 

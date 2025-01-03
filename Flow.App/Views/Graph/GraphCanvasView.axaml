@@ -23,9 +23,49 @@
                         Height="{Binding $parent[ScrollViewer].Bounds.Height}">
                     <Canvas.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Add Recipe Node" Command="{Binding AddRecipeNodeCommand}" />
-                            <MenuItem Header="Add Generic Node" Command="{Binding AddGenericNodeCommand}" />
-                            <MenuItem Header="Add Splerger Node" Command="{Binding AddSplergerNodeCommand}" />
+                            <MenuItem Header="Add Recipe Node">
+                                <MenuItem.Items>
+                                    <MenuItem Header="Basic Recipes">
+                                        <MenuItem.Items>
+                                            <MenuItem Header="Iron Smelting"
+                                                      Command="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AddRecipeNodeCommand}"
+                                                      CommandParameter="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AvailableRecipes[0]}" />
+                                            <MenuItem Header="Copper Smelting"
+                                                      Command="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AddRecipeNodeCommand}"
+                                                      CommandParameter="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AvailableRecipes[1]}" />
+                                            <MenuItem Header="Stone Brick"
+                                                      Command="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AddRecipeNodeCommand}"
+                                                      CommandParameter="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AvailableRecipes[2]}" />
+                                        </MenuItem.Items>
+                                    </MenuItem>
+                                    <MenuItem Header="Advanced Recipes">
+                                        <MenuItem.Items>
+                                            <MenuItem Header="Steel Smelting"
+                                                      Command="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AddRecipeNodeCommand}"
+                                                      CommandParameter="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AvailableRecipes[3]}" />
+                                            <MenuItem Header="Iron Gear"
+                                                      Command="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AddRecipeNodeCommand}"
+                                                      CommandParameter="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AvailableRecipes[4]}" />
+                                            <MenuItem Header="Copper Wire"
+                                                      Command="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AddRecipeNodeCommand}"
+                                                      CommandParameter="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AvailableRecipes[5]}" />
+                                            <MenuItem Header="Electronic Circuit"
+                                                      Command="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AddRecipeNodeCommand}"
+                                                      CommandParameter="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AvailableRecipes[6]}" />
+                                            <MenuItem Header="Electric Motor"
+                                                      Command="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AddRecipeNodeCommand}"
+                                                      CommandParameter="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AvailableRecipes[7]}" />
+                                            <MenuItem Header="Engine Unit"
+                                                      Command="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AddRecipeNodeCommand}"
+                                                      CommandParameter="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AvailableRecipes[8]}" />
+                                        </MenuItem.Items>
+                                    </MenuItem>
+                                </MenuItem.Items>
+                            </MenuItem>
+                            <MenuItem Header="Add Generic Node"
+                                      Command="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AddGenericNodeCommand}" />
+                            <MenuItem Header="Add Splerger Node"
+                                      Command="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AddSplergerNodeCommand}" />
                         </ContextMenu>
                     </Canvas.ContextMenu>
                     <ItemsControl Name="NodesItemsControl"
@@ -39,7 +79,9 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="vm:NodeViewModel">
-                                <views:NodeView PointerPressed="OnNodePointerPressed"
+                                <views:NodeView Canvas.Left="{Binding Position.X}"
+                                              Canvas.Top="{Binding Position.Y}"
+                                              PointerPressed="OnNodePointerPressed"
                                               PointerMoved="OnNodePointerMoved"
                                               PointerReleased="OnNodePointerReleased">
                                     <views:NodeView.RenderTransform>

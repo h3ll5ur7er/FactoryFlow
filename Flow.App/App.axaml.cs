@@ -28,8 +28,9 @@ public partial class App : Application
         ConfigureServices(services);
         Services = services.BuildServiceProvider();
 
-        // Initialize plugin system
+        // Initialize plugin system and game registry
         var pluginLoader = Services.GetRequiredService<PluginLoader>();
+        var gameRegistry = Services.GetRequiredService<IGameRegistry>();
         var pluginDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins");
         Console.WriteLine($"Looking for plugins in: {pluginDirectory}");
         
@@ -39,10 +40,23 @@ public partial class App : Application
             var loadedCount = pluginLoader.LoadPluginsFromDirectory(pluginDirectory);
             Console.WriteLine($"Loaded {loadedCount} plugins");
             
-            var availableGames = pluginLoader.GetAvailableGames();
+            var availableGames = gameRegistry.AvailableGames;
             foreach (var game in availableGames)
             {
                 Console.WriteLine($"Available game: {game.Name} v{game.Version}");
+            }
+
+            if (gameRegistry.ActiveGame != null)
+            {
+                var activeGame = gameRegistry.ActiveGame;
+                Console.WriteLine($"Active game: {activeGame.Name} v{activeGame.Version}");
+                Console.WriteLine($"  Items: {gameRegistry.Items.Count}");
+                Console.WriteLine($"  Machines: {gameRegistry.Machines.Count}");
+                Console.WriteLine($"  Recipes: {gameRegistry.Recipes.Count}");
+            }
+            else
+            {
+                Console.WriteLine("No active game selected");
             }
         }
         catch (Exception ex)
@@ -67,6 +81,7 @@ public partial class App : Application
         services.AddSingleton<INodeFactory, NodeFactory>();
         services.AddSingleton<IGraphManager, GraphManager>();
         services.AddSingleton<IUIActionManager, UIActionManager>();
+        services.AddSingleton<IGameRegistry, GameRegistry>();
         services.AddSingleton<PluginLoader>();
     }
 }

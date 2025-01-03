@@ -39,7 +39,7 @@ public class NodeFactory : INodeFactory
 
         var node = new RecipeNodeViewModel(graphManager)
         {
-            Title = $"New Recipe Node",
+            Title = recipe.DisplayName,
             Recipe = recipe,
             Position = new Point(100, 100)
         };

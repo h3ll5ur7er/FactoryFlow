@@ -1,4 +1,5 @@
 using System.Reflection;
+using Flow.Core.Services;
 
 namespace Flow.Core.Plugins;
 
@@ -8,6 +9,12 @@ namespace Flow.Core.Plugins;
 public class PluginLoader
 {
     private readonly Dictionary<string, IGamePlugin> _plugins = new();
+    private readonly IGameRegistry _gameRegistry;
+
+    public PluginLoader(IGameRegistry gameRegistry)
+    {
+        _gameRegistry = gameRegistry;
+    }
 
     /// <summary>
     /// Registers a new game plugin.
@@ -23,6 +30,7 @@ public class PluginLoader
             throw new ArgumentException($"A plugin for game '{plugin.GameName}' is already registered.");
 
         _plugins.Add(plugin.GameName, plugin);
+        _gameRegistry.RegisterGame(plugin);
         Console.WriteLine($"Registered plugin: {plugin.GameName} v{plugin.Version}");
     }
 
