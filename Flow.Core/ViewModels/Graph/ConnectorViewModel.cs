@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Flow.Core.Models;
 
 namespace Flow.ViewModels.Graph;
 
@@ -13,92 +9,77 @@ public enum ConnectorType
     Output
 }
 
-public partial class ConnectorViewModel : ViewModelBase
+public partial class ConnectorViewModel : ObservableObject
 {
+    private readonly NodeViewModel _node;
+    private readonly ObservableCollection<ConnectionViewModel> _connections = new();
+
+    [ObservableProperty]
+    private string _identifier;
+
+    [ObservableProperty]
+    private string _displayName;
+
     [ObservableProperty]
     private ConnectorType _type;
 
     [ObservableProperty]
-    private bool _allowMultipleConnections;
+    private bool _allowsMultipleConnections;
 
-    [ObservableProperty]
-    private string _title = string.Empty;
-
-    [ObservableProperty]
-    private Item? _itemType;
-
-    private readonly ObservableCollection<ConnectorViewModel> _connections = new();
-    public IReadOnlyCollection<ConnectorViewModel> Connections => _connections;
-
+    public NodeViewModel Node => _node;
+    public IReadOnlyCollection<ConnectionViewModel> Connections => _connections;
     public bool IsConnected => _connections.Count > 0;
 
-    public HashSet<Type> AcceptedTypes { get; } = new();
-
-    public ConnectorViewModel(ConnectorType type)
+    public ConnectorViewModel(string identifier, string displayName, NodeViewModel node, ConnectorType type, bool allowsMultipleConnections)
     {
+        _identifier = identifier;
+        _displayName = displayName;
+        _node = node;
         _type = type;
+        _allowsMultipleConnections = allowsMultipleConnections;
     }
 
     public bool CanConnectTo(ConnectorViewModel other)
     {
-        if (other == null)
-            throw new ArgumentNullException(nameof(other));
+        // Cannot connect to self
+        if (this == other) return false;
 
-        // Can't connect to self
-        if (other == this)
-            return false;
+        // Cannot connect to same node
+        if (Node == other.Node) return false;
 
-        // Must connect input to output
-        if (Type == other.Type)
-            return false;
+        // Cannot connect same types
+        if (Type == other.Type) return false;
 
-        // Check if either connector already has connections and doesn't allow multiple
-        if (IsConnected && !AllowMultipleConnections)
-            return false;
-        if (other.IsConnected && !other.AllowMultipleConnections)
-            return false;
+        // Check if multiple connections are allowed
+        if (!AllowsMultipleConnections && IsConnected) return false;
+        if (!other.AllowsMultipleConnections && other.IsConnected) return false;
 
-        // If no accepted types are specified, allow all connections
-        if (AcceptedTypes.Count == 0 && other.AcceptedTypes.Count == 0)
-            return true;
-
-        // Check type compatibility
-        return AcceptedTypes.Overlaps(other.AcceptedTypes);
-    }
-
-    public bool TryConnect(ConnectorViewModel other)
-    {
-        if (!CanConnectTo(other))
-            return false;
-
-        _connections.Add(other);
-        other._connections.Add(this);
-        OnPropertyChanged(nameof(IsConnected));
         return true;
     }
 
-    public bool TryDisconnect(ConnectorViewModel other)
+    public void AddConnection(ConnectionViewModel connection)
     {
-        if (other == null)
-            throw new ArgumentNullException(nameof(other));
-
-        var removed = _connections.Remove(other);
-        if (removed)
-        {
-            other._connections.Remove(this);
-            OnPropertyChanged(nameof(IsConnected));
-        }
-        return removed;
+        if (!CanAcceptConnection(connection)) return;
+        _connections.Add(connection);
+        OnPropertyChanged(nameof(IsConnected));
     }
 
-    public void DisconnectAll()
+    public void RemoveConnection(ConnectionViewModel connection)
     {
-        foreach (var connection in _connections.ToArray())
+        if (_connections.Remove(connection))
         {
-            connection._connections.Remove(this);
-            connection.OnPropertyChanged(nameof(IsConnected));
+            OnPropertyChanged(nameof(IsConnected));
         }
-        _connections.Clear();
-        OnPropertyChanged(nameof(IsConnected));
+    }
+
+    private bool CanAcceptConnection(ConnectionViewModel connection)
+    {
+        // Verify this connector is part of the connection
+        if (connection.Source != this && connection.Target != this) return false;
+
+        // Check if multiple connections are allowed
+        if (!AllowsMultipleConnections && IsConnected) return false;
+
+        return true;
     }
 } 

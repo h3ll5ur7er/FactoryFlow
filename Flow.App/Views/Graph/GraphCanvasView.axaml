@@ -68,20 +68,25 @@
                                       Command="{Binding $parent[UserControl].((vm:GraphCanvasViewModel)DataContext).AddSplergerNodeCommand}" />
                         </ContextMenu>
                     </Canvas.ContextMenu>
+
+                    <!-- Connections -->
+                    <Canvas Name="ConnectionsCanvas"
+                            Width="{Binding $parent[Canvas].Bounds.Width}"
+                            Height="{Binding $parent[Canvas].Bounds.Height}"
+                            IsHitTestVisible="False" />
+
+                    <!-- Nodes -->
                     <ItemsControl Name="NodesItemsControl"
-                                ItemsSource="{Binding Nodes}"
-                                Width="{Binding $parent[Canvas].Bounds.Width}"
-                                Height="{Binding $parent[Canvas].Bounds.Height}">
+                                ItemsSource="{Binding Nodes}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <Canvas />
+                                <Canvas Width="{Binding $parent[Canvas].Bounds.Width}"
+                                        Height="{Binding $parent[Canvas].Bounds.Height}" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="vm:NodeViewModel">
-                                <views:NodeView Canvas.Left="{Binding Position.X}"
-                                              Canvas.Top="{Binding Position.Y}"
-                                              PointerPressed="OnNodePointerPressed"
+                                <views:NodeView PointerPressed="OnNodePointerPressed"
                                               PointerMoved="OnNodePointerMoved"
                                               PointerReleased="OnNodePointerReleased">
                                     <views:NodeView.RenderTransform>
@@ -92,6 +97,14 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+
+                    <!-- Temporary Connection Layer -->
+                    <Canvas Name="TemporaryConnectionLayer"
+                            Width="{Binding $parent[Canvas].Bounds.Width}"
+                            Height="{Binding $parent[Canvas].Bounds.Height}"
+                            Background="Transparent"
+                            IsHitTestVisible="False"
+                            ZIndex="1000" />
                 </Canvas>
             </Panel>
         </ScrollViewer>

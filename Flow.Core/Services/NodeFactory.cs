@@ -19,13 +19,13 @@ public class NodeFactory : INodeFactory
         switch (type)
         {
             case NodeType.Generic:
-                node.AddInputConnector(new ConnectorViewModel(ConnectorType.Input));
-                node.AddOutputConnector(new ConnectorViewModel(ConnectorType.Output));
+                node.AddInputConnector(new ConnectorViewModel("input", "Input", node, ConnectorType.Input, true));
+                node.AddOutputConnector(new ConnectorViewModel("output", "Output", node, ConnectorType.Output, true));
                 break;
             case NodeType.Splerger:
-                node.AddInputConnector(new ConnectorViewModel(ConnectorType.Input));
-                node.AddOutputConnector(new ConnectorViewModel(ConnectorType.Output));
-                node.AddOutputConnector(new ConnectorViewModel(ConnectorType.Output));
+                node.AddInputConnector(new ConnectorViewModel("input", "Input", node, ConnectorType.Input, true));
+                node.AddOutputConnector(new ConnectorViewModel("output1", "Output 1", node, ConnectorType.Output, true));
+                node.AddOutputConnector(new ConnectorViewModel("output2", "Output 2", node, ConnectorType.Output, true));
                 break;
         }
 
@@ -45,25 +45,31 @@ public class NodeFactory : INodeFactory
         };
 
         // Add input connectors for each input item
+        var inputIndex = 0;
         foreach (var input in recipe.Inputs)
         {
-            var connector = new ConnectorViewModel(ConnectorType.Input)
-            {
-                Title = input.Item.DisplayName,
-                ItemType = input.Item
-            };
+            var connector = new ConnectorViewModel(
+                $"input{inputIndex}",
+                input.Item.DisplayName,
+                node,
+                ConnectorType.Input,
+                false);
             node.AddInputConnector(connector);
+            inputIndex++;
         }
 
         // Add output connectors for each output item
+        var outputIndex = 0;
         foreach (var output in recipe.Outputs)
         {
-            var connector = new ConnectorViewModel(ConnectorType.Output)
-            {
-                Title = output.Item.DisplayName,
-                ItemType = output.Item
-            };
+            var connector = new ConnectorViewModel(
+                $"output{outputIndex}",
+                output.Item.DisplayName,
+                node,
+                ConnectorType.Output,
+                true);
             node.AddOutputConnector(connector);
+            outputIndex++;
         }
 
         return node;

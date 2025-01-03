@@ -18,6 +18,7 @@ public partial class GraphCanvasViewModel : ObservableObject
     private NodeViewModel? _selectedNode;
 
     public ObservableCollection<NodeViewModel> Nodes { get; } = new();
+    public ObservableCollection<ConnectionViewModel> Connections { get; } = new();
 
     public List<Recipe> AvailableRecipes => _gameRegistry.Recipes.ToList();
 
@@ -59,7 +60,46 @@ public partial class GraphCanvasViewModel : ObservableObject
 
     public void RemoveNode(NodeViewModel node)
     {
+        // Remove all connections associated with this node
+        var connectionsToRemove = Connections
+            .Where(c => c.Source.Node == node || c.Target.Node == node)
+            .ToList();
+
+        foreach (var connection in connectionsToRemove)
+        {
+            RemoveConnection(connection);
+        }
+
         Nodes.Remove(node);
+    }
+
+    public void CreateConnection(ConnectorViewModel source, ConnectorViewModel target)
+    {
+        // Ensure one is input and one is output
+        if (source.Type == target.Type) return;
+
+        // Order them correctly (output -> input)
+        var (output, input) = source.Type == ConnectorType.Output
+            ? (source, target)
+            : (target, source);
+
+        // Check if connection is allowed
+        if (!output.CanConnectTo(input)) return;
+
+        // Create the connection
+        var connection = new ConnectionViewModel(output, input);
+        Connections.Add(connection);
+
+        // Update connector states
+        output.AddConnection(connection);
+        input.AddConnection(connection);
+    }
+
+    public void RemoveConnection(ConnectionViewModel connection)
+    {
+        connection.Source.RemoveConnection(connection);
+        connection.Target.RemoveConnection(connection);
+        Connections.Remove(connection);
     }
 
     private Point _contextMenuPosition;

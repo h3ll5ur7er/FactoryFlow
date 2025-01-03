@@ -3,6 +3,7 @@
              xmlns:local="using:Flow.App"
              xmlns:vm="using:Flow.ViewModels.Graph"
              xmlns:views="using:Flow.App.Views.Graph"
+             xmlns:converters="using:Flow.App.Converters"
              x:Class="Flow.App.App">
 
     <Application.DataTemplates>
@@ -18,4 +19,8 @@
     <Application.Styles>
         <FluentTheme />
     </Application.Styles>
+    
+    <Application.Resources>
+        <converters:ConnectorColorConverter x:Key="ConnectorColorConverter"/>
+    </Application.Resources>
 </Application>

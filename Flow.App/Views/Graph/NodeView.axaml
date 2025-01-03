@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Flow.ViewModels.Graph"
+             xmlns:views="using:Flow.App.Views.Graph"
              mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="150"
              x:Class="Flow.App.Views.Graph.NodeView"
              x:DataType="vm:NodeViewModel">
@@ -40,12 +41,8 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Margin="4">
-                                <Border Width="16" Height="16"
-                                        Background="#4D4D4D"
-                                        BorderBrush="#6D6D6D"
-                                        BorderThickness="1"
-                                        CornerRadius="8" />
-                                <TextBlock Text="{Binding Title}"
+                                <views:ConnectorView />
+                                <TextBlock Text="{Binding DisplayName}"
                                          VerticalAlignment="Center"
                                          Margin="4,0,0,0"
                                          Foreground="#CCCCCC" />
@@ -76,15 +73,11 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Margin="4">
-                                <TextBlock Text="{Binding Title}"
+                                <TextBlock Text="{Binding DisplayName}"
                                          VerticalAlignment="Center"
                                          Margin="0,0,4,0"
                                          Foreground="#CCCCCC" />
-                                <Border Width="16" Height="16"
-                                        Background="#4D4D4D"
-                                        BorderBrush="#6D6D6D"
-                                        BorderThickness="1"
-                                        CornerRadius="8" />
+                                <views:ConnectorView />
                             </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

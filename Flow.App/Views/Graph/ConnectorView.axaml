@@ -1,0 +1,37 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Flow.ViewModels.Graph"
+             mc:Ignorable="d" d:DesignWidth="50" d:DesignHeight="50"
+             x:Class="Flow.App.Views.Graph.ConnectorView"
+             x:DataType="vm:ConnectorViewModel">
+    
+    <Border Name="ConnectorBorder"
+            Width="16" Height="16"
+            CornerRadius="8"
+            Background="{Binding IsConnected, Converter={StaticResource ConnectorColorConverter}}"
+            BorderBrush="#666666"
+            BorderThickness="2"
+            ToolTip.Tip="{Binding DisplayName}"
+            Cursor="Hand"
+            PointerPressed="OnConnectorPointerPressed"
+            PointerMoved="OnConnectorPointerMoved"
+            PointerReleased="OnConnectorPointerReleased">
+        
+        <Border.Styles>
+            <Style Selector="Border">
+                <Setter Property="Background" Value="#333333"/>
+            </Style>
+            <Style Selector="Border:pointerover">
+                <Setter Property="Background" Value="#444444"/>
+            </Style>
+            <Style Selector="Border.connected">
+                <Setter Property="Background" Value="#666666"/>
+            </Style>
+            <Style Selector="Border.dragging">
+                <Setter Property="Background" Value="#888888"/>
+            </Style>
+        </Border.Styles>
+    </Border>
+</UserControl> 
