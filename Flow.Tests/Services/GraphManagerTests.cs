@@ -20,6 +20,7 @@ public class GraphManagerTests
         graphManager.AddNode(node);
 
         // Assert
+        Assert.NotNull(graphManager.CurrentGraph);
         Assert.Contains(node, graphManager.CurrentGraph.Nodes);
     }
 
@@ -37,6 +38,7 @@ public class GraphManagerTests
         graphManager.RemoveNode(node);
 
         // Assert
+        Assert.NotNull(graphManager.CurrentGraph);
         Assert.DoesNotContain(node, graphManager.CurrentGraph.Nodes);
     }
 
@@ -56,6 +58,7 @@ public class GraphManagerTests
         graphManager.ClearGraph();
 
         // Assert
+        Assert.NotNull(graphManager.CurrentGraph);
         Assert.Empty(graphManager.CurrentGraph.Nodes);
     }
 

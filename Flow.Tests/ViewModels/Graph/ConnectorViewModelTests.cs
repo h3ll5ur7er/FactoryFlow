@@ -7,34 +7,69 @@ namespace Flow.Tests.ViewModels.Graph;
 public class ConnectorViewModelTests
 {
     [Fact]
-    public void Constructor_ShouldInitializeWithCorrectType()
+    public void Constructor_ShouldInitializeWithCorrectValues()
     {
-        // Arrange & Act
-        var connector = new ConnectorViewModel(ConnectorType.Input);
+        // Arrange
+        var node = new NodeViewModel(Flow.Tests.TestHelpers.MockFactory.CreateGraphManager().Object);
+        
+        // Act
+        var connector = new ConnectorViewModel("test", "Test Connector", node, ConnectorType.Input, false);
 
         // Assert
+        Assert.Equal("test", connector.Identifier);
+        Assert.Equal("Test Connector", connector.DisplayName);
         Assert.Equal(ConnectorType.Input, connector.Type);
+        Assert.False(connector.AllowsMultipleConnections);
         Assert.False(connector.IsConnected);
-        Assert.False(connector.AllowMultipleConnections);
         Assert.Empty(connector.Connections);
-        Assert.Empty(connector.AcceptedTypes);
+        Assert.Equal(node, connector.Node);
     }
 
-    [Fact]
-    public void CanConnectTo_WhenOtherIsNull_ShouldThrowArgumentNullException()
+    [Theory]
+    [InlineData(null, "Test")]
+    [InlineData("", "Test")]
+    [InlineData(" ", "Test")]
+    public void Constructor_WithInvalidIdentifier_ThrowsArgumentException(string? identifier, string displayName)
     {
         // Arrange
-        var connector = new ConnectorViewModel(ConnectorType.Input);
+        var node = new NodeViewModel(Flow.Tests.TestHelpers.MockFactory.CreateGraphManager().Object);
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => connector.CanConnectTo(null!));
+        var exception = Assert.Throws<ArgumentException>(
+            () => new ConnectorViewModel(identifier!, displayName, node, ConnectorType.Input, false));
+        Assert.Contains("Identifier", exception.Message);
+    }
+
+    [Theory]
+    [InlineData("test", null)]
+    [InlineData("test", "")]
+    [InlineData("test", " ")]
+    public void Constructor_WithInvalidDisplayName_ThrowsArgumentException(string identifier, string? displayName)
+    {
+        // Arrange
+        var node = new NodeViewModel(Flow.Tests.TestHelpers.MockFactory.CreateGraphManager().Object);
+
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentException>(
+            () => new ConnectorViewModel(identifier, displayName!, node, ConnectorType.Input, false));
+        Assert.Contains("Display name", exception.Message);
     }
 
     [Fact]
-    public void CanConnectTo_WhenSameConnector_ShouldReturnFalse()
+    public void Constructor_WithNullNode_ThrowsArgumentNullException()
+    {
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentNullException>(
+            () => new ConnectorViewModel("test", "Test", null!, ConnectorType.Input, false));
+        Assert.Equal("node", exception.ParamName);
+    }
+
+    [Fact]
+    public void CanConnectTo_WhenSameConnector_ReturnsFalse()
     {
         // Arrange
-        var connector = new ConnectorViewModel(ConnectorType.Input);
+        var node = new NodeViewModel(Flow.Tests.TestHelpers.MockFactory.CreateGraphManager().Object);
+        var connector = new ConnectorViewModel("test", "Test", node, ConnectorType.Input, false);
 
         // Act
         var result = connector.CanConnectTo(connector);
@@ -44,11 +79,28 @@ public class ConnectorViewModelTests
     }
 
     [Fact]
-    public void CanConnectTo_WhenSameType_ShouldReturnFalse()
+    public void CanConnectTo_WhenSameNode_ReturnsFalse()
     {
         // Arrange
-        var input1 = new ConnectorViewModel(ConnectorType.Input);
-        var input2 = new ConnectorViewModel(ConnectorType.Input);
+        var node = new NodeViewModel(Flow.Tests.TestHelpers.MockFactory.CreateGraphManager().Object);
+        var input = new ConnectorViewModel("input", "Input", node, ConnectorType.Input, false);
+        var output = new ConnectorViewModel("output", "Output", node, ConnectorType.Output, false);
+
+        // Act
+        var result = input.CanConnectTo(output);
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void CanConnectTo_WhenSameType_ReturnsFalse()
+    {
+        // Arrange
+        var node1 = new NodeViewModel(Flow.Tests.TestHelpers.MockFactory.CreateGraphManager().Object);
+        var node2 = new NodeViewModel(Flow.Tests.TestHelpers.MockFactory.CreateGraphManager().Object);
+        var input1 = new ConnectorViewModel("input1", "Input 1", node1, ConnectorType.Input, false);
+        var input2 = new ConnectorViewModel("input2", "Input 2", node2, ConnectorType.Input, false);
 
         // Act
         var result = input1.CanConnectTo(input2);
@@ -58,178 +110,87 @@ public class ConnectorViewModelTests
     }
 
     [Fact]
-    public void CanConnectTo_WhenAlreadyConnectedAndNoMultiple_ShouldReturnFalse()
+    public void CanConnectTo_WhenAlreadyConnectedAndNoMultipleConnections_ReturnsFalse()
     {
         // Arrange
-        var input = new ConnectorViewModel(ConnectorType.Input);
-        var output1 = new ConnectorViewModel(ConnectorType.Output);
-        var output2 = new ConnectorViewModel(ConnectorType.Output);
-        
-        input.TryConnect(output1);
+        var node1 = new NodeViewModel(Flow.Tests.TestHelpers.MockFactory.CreateGraphManager().Object);
+        var node2 = new NodeViewModel(Flow.Tests.TestHelpers.MockFactory.CreateGraphManager().Object);
+        var node3 = new NodeViewModel(Flow.Tests.TestHelpers.MockFactory.CreateGraphManager().Object);
+        var output = new ConnectorViewModel("output", "Output", node1, ConnectorType.Output, false);
+        var input1 = new ConnectorViewModel("input1", "Input 1", node2, ConnectorType.Input, false);
+        var input2 = new ConnectorViewModel("input2", "Input 2", node3, ConnectorType.Input, false);
+
+        // Create first connection
+        var connection = new ConnectionViewModel(output, input1);
+        output.AddConnection(connection);
+        input1.AddConnection(connection);
 
         // Act
-        var result = input.CanConnectTo(output2);
+        var result = output.CanConnectTo(input2);
 
         // Assert
         Assert.False(result);
     }
 
     [Fact]
-    public void CanConnectTo_WhenAllowMultipleConnections_ShouldReturnTrue()
+    public void CanConnectTo_WhenValidConnection_ReturnsTrue()
     {
         // Arrange
-        var input = new ConnectorViewModel(ConnectorType.Input) { AllowMultipleConnections = true };
-        var output1 = new ConnectorViewModel(ConnectorType.Output);
-        var output2 = new ConnectorViewModel(ConnectorType.Output);
-        
-        input.TryConnect(output1);
+        var node1 = new NodeViewModel(Flow.Tests.TestHelpers.MockFactory.CreateGraphManager().Object);
+        var node2 = new NodeViewModel(Flow.Tests.TestHelpers.MockFactory.CreateGraphManager().Object);
+        var output = new ConnectorViewModel("output", "Output", node1, ConnectorType.Output, true);
+        var input = new ConnectorViewModel("input", "Input", node2, ConnectorType.Input, true);
 
         // Act
-        var result = input.CanConnectTo(output2);
+        var result = output.CanConnectTo(input);
 
         // Assert
         Assert.True(result);
     }
 
     [Fact]
-    public void CanConnectTo_WhenNoAcceptedTypes_ShouldReturnTrue()
+    public void AddConnection_WhenValid_AddsConnection()
     {
         // Arrange
-        var input = new ConnectorViewModel(ConnectorType.Input);
-        var output = new ConnectorViewModel(ConnectorType.Output);
+        var node1 = new NodeViewModel(Flow.Tests.TestHelpers.MockFactory.CreateGraphManager().Object);
+        var node2 = new NodeViewModel(Flow.Tests.TestHelpers.MockFactory.CreateGraphManager().Object);
+        var output = new ConnectorViewModel("output", "Output", node1, ConnectorType.Output, true);
+        var input = new ConnectorViewModel("input", "Input", node2, ConnectorType.Input, true);
+        var connection = new ConnectionViewModel(output, input);
 
         // Act
-        var result = input.CanConnectTo(output);
+        output.AddConnection(connection);
+        input.AddConnection(connection);
 
         // Assert
-        Assert.True(result);
-    }
-
-    [Fact]
-    public void CanConnectTo_WhenCompatibleTypes_ShouldReturnTrue()
-    {
-        // Arrange
-        var input = new ConnectorViewModel(ConnectorType.Input);
-        var output = new ConnectorViewModel(ConnectorType.Output);
-        
-        input.AcceptedTypes.Add(typeof(string));
-        output.AcceptedTypes.Add(typeof(string));
-
-        // Act
-        var result = input.CanConnectTo(output);
-
-        // Assert
-        Assert.True(result);
-    }
-
-    [Fact]
-    public void CanConnectTo_WhenIncompatibleTypes_ShouldReturnFalse()
-    {
-        // Arrange
-        var input = new ConnectorViewModel(ConnectorType.Input);
-        var output = new ConnectorViewModel(ConnectorType.Output);
-        
-        input.AcceptedTypes.Add(typeof(string));
-        output.AcceptedTypes.Add(typeof(int));
-
-        // Act
-        var result = input.CanConnectTo(output);
-
-        // Assert
-        Assert.False(result);
-    }
-
-    [Fact]
-    public void TryConnect_WhenValid_ShouldConnectBothWays()
-    {
-        // Arrange
-        var input = new ConnectorViewModel(ConnectorType.Input);
-        var output = new ConnectorViewModel(ConnectorType.Output);
-
-        // Act
-        var result = input.TryConnect(output);
-
-        // Assert
-        Assert.True(result);
-        Assert.Single(input.Connections);
         Assert.Single(output.Connections);
-        Assert.Contains(output, input.Connections);
-        Assert.Contains(input, output.Connections);
-        Assert.True(input.IsConnected);
+        Assert.Single(input.Connections);
+        Assert.Contains(connection, output.Connections);
+        Assert.Contains(connection, input.Connections);
         Assert.True(output.IsConnected);
+        Assert.True(input.IsConnected);
     }
 
     [Fact]
-    public void TryConnect_WhenInvalid_ShouldReturnFalseAndNotConnect()
+    public void RemoveConnection_RemovesConnectionAndUpdatesState()
     {
         // Arrange
-        var input1 = new ConnectorViewModel(ConnectorType.Input);
-        var input2 = new ConnectorViewModel(ConnectorType.Input);
+        var node1 = new NodeViewModel(Flow.Tests.TestHelpers.MockFactory.CreateGraphManager().Object);
+        var node2 = new NodeViewModel(Flow.Tests.TestHelpers.MockFactory.CreateGraphManager().Object);
+        var output = new ConnectorViewModel("output", "Output", node1, ConnectorType.Output, true);
+        var input = new ConnectorViewModel("input", "Input", node2, ConnectorType.Input, true);
+        var connection = new ConnectionViewModel(output, input);
+        output.AddConnection(connection);
+        input.AddConnection(connection);
 
         // Act
-        var result = input1.TryConnect(input2);
+        output.RemoveConnection(connection);
+        input.RemoveConnection(connection);
 
         // Assert
-        Assert.False(result);
-        Assert.Empty(input1.Connections);
-        Assert.Empty(input2.Connections);
-        Assert.False(input1.IsConnected);
-        Assert.False(input2.IsConnected);
-    }
-
-    [Fact]
-    public void TryDisconnect_WhenConnected_ShouldDisconnectBothWays()
-    {
-        // Arrange
-        var input = new ConnectorViewModel(ConnectorType.Input);
-        var output = new ConnectorViewModel(ConnectorType.Output);
-        input.TryConnect(output);
-
-        // Act
-        var result = input.TryDisconnect(output);
-
-        // Assert
-        Assert.True(result);
-        Assert.Empty(input.Connections);
         Assert.Empty(output.Connections);
-        Assert.False(input.IsConnected);
-        Assert.False(output.IsConnected);
-    }
-
-    [Fact]
-    public void TryDisconnect_WhenNotConnected_ShouldReturnFalse()
-    {
-        // Arrange
-        var input = new ConnectorViewModel(ConnectorType.Input);
-        var output = new ConnectorViewModel(ConnectorType.Output);
-
-        // Act
-        var result = input.TryDisconnect(output);
-
-        // Assert
-        Assert.False(result);
-    }
-
-    [Fact]
-    public void DisconnectAll_ShouldRemoveAllConnections()
-    {
-        // Arrange
-        var input = new ConnectorViewModel(ConnectorType.Input) { AllowMultipleConnections = true };
-        var output1 = new ConnectorViewModel(ConnectorType.Output);
-        var output2 = new ConnectorViewModel(ConnectorType.Output);
-        
-        input.TryConnect(output1);
-        input.TryConnect(output2);
-
-        // Act
-        input.DisconnectAll();
-
-        // Assert
         Assert.Empty(input.Connections);
-        Assert.Empty(output1.Connections);
-        Assert.Empty(output2.Connections);
+        Assert.False(output.IsConnected);
         Assert.False(input.IsConnected);
-        Assert.False(output1.IsConnected);
-        Assert.False(output2.IsConnected);
     }
 } 

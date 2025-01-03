@@ -32,6 +32,15 @@ public partial class ConnectorViewModel : ObservableObject
 
     public ConnectorViewModel(string identifier, string displayName, NodeViewModel node, ConnectorType type, bool allowsMultipleConnections)
     {
+        if (string.IsNullOrWhiteSpace(identifier))
+            throw new ArgumentException("Identifier cannot be empty", nameof(identifier));
+
+        if (string.IsNullOrWhiteSpace(displayName))
+            throw new ArgumentException("Display name cannot be empty", nameof(displayName));
+
+        if (node == null)
+            throw new ArgumentNullException(nameof(node));
+
         _identifier = identifier;
         _displayName = displayName;
         _node = node;
@@ -41,6 +50,9 @@ public partial class ConnectorViewModel : ObservableObject
 
     public bool CanConnectTo(ConnectorViewModel other)
     {
+        if (other == null)
+            throw new ArgumentNullException(nameof(other));
+
         // Cannot connect to self
         if (this == other) return false;
 
@@ -74,6 +86,9 @@ public partial class ConnectorViewModel : ObservableObject
 
     private bool CanAcceptConnection(ConnectionViewModel connection)
     {
+        if (connection == null)
+            throw new ArgumentNullException(nameof(connection));
+
         // Verify this connector is part of the connection
         if (connection.Source != this && connection.Target != this) return false;
 

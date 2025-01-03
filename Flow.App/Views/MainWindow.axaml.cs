@@ -17,21 +17,10 @@ public partial class MainWindow : Window
         try
         {
             // Get services
-            var services = App.Current?.Services;
-            if (services == null)
-            {
-                Console.WriteLine("ERROR: Services not initialized!");
-                return;
-            }
-
+            var services = App.Current?.Services ?? throw new InvalidOperationException("Services not initialized!");
+            
             var graphManager = services.GetRequiredService<IGraphManager>();
             var nodeFactory = services.GetRequiredService<INodeFactory>();
-
-            if (graphManager == null || nodeFactory == null)
-            {
-                Console.WriteLine("ERROR: Required services not found!");
-                return;
-            }
 
             Console.WriteLine($"GraphManager: {graphManager != null}");
             Console.WriteLine($"NodeFactory: {nodeFactory != null}");
@@ -55,14 +44,11 @@ public partial class MainWindow : Window
 
             // Add node to graph
             graphManager.AddNode(node);
-            if (graphManager.CurrentGraph != null)
-            {
-                Console.WriteLine($"Added node to graph. Node count: {graphManager.CurrentGraph.Nodes.Count}");
-            }
+            Console.WriteLine($"Added node to graph. Node count: {graphManager.CurrentGraph?.Nodes.Count ?? 0}");
 
             // Set DataContext
-            this.DataContext = graphManager.CurrentGraph;
-            Console.WriteLine($"Set DataContext to graph. DataContext type: {this.DataContext?.GetType().Name}");
+            DataContext = graphManager.CurrentGraph;
+            Console.WriteLine($"Set DataContext to graph. DataContext type: {DataContext?.GetType().Name}");
         }
         catch (Exception ex)
         {

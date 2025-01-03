@@ -8,14 +8,14 @@ namespace Flow.ViewModels.Graph;
 
 public class RecipeNodeViewModel : NodeViewModel
 {
-    private Recipe _recipe;
+    private Recipe? _recipe;
     public Recipe Recipe
     {
-        get => _recipe;
+        get => _recipe ?? throw new InvalidOperationException("Recipe is not set");
         set
         {
             if (value == null)
-                throw new System.ArgumentNullException(nameof(value));
+                throw new ArgumentNullException(nameof(value));
             SetProperty(ref _recipe, value);
             Title = value.DisplayName;
         }
@@ -24,5 +24,6 @@ public class RecipeNodeViewModel : NodeViewModel
     public RecipeNodeViewModel(IGraphManager graphManager) : base(graphManager)
     {
         NodeType = NodeType.Recipe;
+        Title = "New Recipe Node";  // Set a default title until Recipe is set
     }
 } 

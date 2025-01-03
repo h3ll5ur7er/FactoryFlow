@@ -12,6 +12,13 @@ public class Recipe
     protected Recipe()
     {
         // Protected constructor for mocking
+        // Initialize with empty values to satisfy non-null requirements
+        Identifier = string.Empty;
+        DisplayName = string.Empty;
+        Inputs = Array.Empty<ItemStack>();
+        Outputs = Array.Empty<ItemStack>();
+        Machine = new Machine("empty", "Empty", 0m);
+        ProcessingTime = TimeSpan.Zero;
     }
 
     public Recipe(

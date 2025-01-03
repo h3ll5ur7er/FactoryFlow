@@ -90,7 +90,7 @@ public partial class GraphCanvasView : UserControl
         var temporaryConnectionLayer = this.FindControl<Canvas>("TemporaryConnectionLayer");
 
         // Add the drag path to the temporary connection layer
-        if (temporaryConnectionLayer != null && _dragPath != null)
+        if (temporaryConnectionLayer != null)
         {
             temporaryConnectionLayer.Children.Add(_dragPath);
         }
@@ -98,7 +98,10 @@ public partial class GraphCanvasView : UserControl
         // Set up nodes canvas event handlers
         if (_nodesCanvas != null)
         {
-            _nodesCanvas.ContextMenu!.Opening += OnContextMenuOpening;
+            if (_nodesCanvas.ContextMenu != null)
+            {
+                _nodesCanvas.ContextMenu.Opening += OnContextMenuOpening;
+            }
             _nodesCanvas.PointerPressed += OnCanvasPointerPressed;
             _nodesCanvas.PointerMoved += OnCanvasPointerMoved;
             _nodesCanvas.PointerReleased += OnCanvasPointerReleased;
@@ -238,13 +241,12 @@ public partial class GraphCanvasView : UserControl
 
     private void OnCanvasPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (_nodesCanvas != null && e.GetCurrentPoint(_nodesCanvas).Properties.IsRightButtonPressed)
+        if (_nodesCanvas == null) return;
+
+        if (e.GetCurrentPoint(_nodesCanvas).Properties.IsRightButtonPressed)
         {
             _contextMenuPosition = e.GetPosition(_nodesCanvas);
-            if (ViewModel != null)
-            {
-                ViewModel.SetContextMenuPosition(_contextMenuPosition);
-            }
+            ViewModel?.SetContextMenuPosition(_contextMenuPosition);
         }
     }
 
