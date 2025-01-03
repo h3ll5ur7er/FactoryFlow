@@ -2,7 +2,8 @@ using System;
 using System.Collections.ObjectModel;
 using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Flow.ViewModels;
+using CommunityToolkit.Mvvm.Input;
+using Flow.Core.Services;
 
 namespace Flow.ViewModels.Graph;
 
@@ -16,6 +17,19 @@ public enum NodeType
 
 public partial class NodeViewModel : ViewModelBase
 {
+    private readonly IGraphManager _graphManager;
+
+    public NodeViewModel(IGraphManager graphManager)
+    {
+        _graphManager = graphManager;
+    }
+
+    [RelayCommand]
+    private void Delete()
+    {
+        _graphManager.RemoveNode(this);
+    }
+
     [ObservableProperty]
     private Point _position;
 

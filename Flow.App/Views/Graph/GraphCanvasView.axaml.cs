@@ -63,7 +63,13 @@ public partial class GraphCanvasView : UserControl
         if (sender is not Control control || control.DataContext is not NodeViewModel node)
             return;
 
-        Console.WriteLine($"Node pointer pressed: {node.Title}");
+        if (e.GetCurrentPoint(control).Properties.IsRightButtonPressed)
+        {
+            // Let the right-click event bubble up to show the context menu
+            return;
+        }
+
+        Console.WriteLine($"Started dragging node: {node.Title} from position {node.Position}");
         _dragStart = e.GetPosition(this.FindControl<Canvas>("NodesCanvas"));
         _nodeStartPosition = node.Position;
         _draggedNode = node;
@@ -79,7 +85,6 @@ public partial class GraphCanvasView : UserControl
         var delta = currentPosition - _dragStart.Value;
         var newPosition = _nodeStartPosition.Value + delta;
         _draggedNode.SetPosition(newPosition.X, newPosition.Y);
-        Console.WriteLine($"Node moved to: {_draggedNode.Position}");
     }
 
     private void OnNodePointerReleased(object? sender, PointerReleasedEventArgs e)
@@ -89,7 +94,7 @@ public partial class GraphCanvasView : UserControl
             e.Pointer.Capture(null);
             if (_draggedNode != null)
             {
-                Console.WriteLine($"Node drag ended at: {_draggedNode.Position}");
+                Console.WriteLine($"Finished dragging node: {_draggedNode.Title} at position {_draggedNode.Position}");
             }
         }
 

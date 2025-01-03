@@ -4,44 +4,45 @@ namespace Flow.Core.Services;
 
 public class GraphManager : IGraphManager
 {
-    private GraphCanvasViewModel _currentGraph;
+    private readonly INodeFactory _nodeFactory;
+    private GraphCanvasViewModel? _currentGraph;
 
-    public GraphCanvasViewModel CurrentGraph => _currentGraph;
+    public GraphCanvasViewModel? CurrentGraph => _currentGraph;
 
-    public GraphManager()
+    public GraphManager(INodeFactory nodeFactory)
     {
-        _currentGraph = new GraphCanvasViewModel();
+        _nodeFactory = nodeFactory;
+        CreateNewGraph();
     }
 
     public void CreateNewGraph()
     {
-        _currentGraph = new GraphCanvasViewModel();
+        _currentGraph = new GraphCanvasViewModel(_nodeFactory, this);
     }
 
     public void LoadGraph(string path)
     {
         // TODO: Implement graph loading
-        throw new NotImplementedException();
+        _currentGraph = new GraphCanvasViewModel(_nodeFactory, this);
     }
 
     public void SaveGraph(string path)
     {
         // TODO: Implement graph saving
-        throw new NotImplementedException();
     }
 
     public void AddNode(NodeViewModel node)
     {
-        _currentGraph.AddNode(node);
+        _currentGraph?.AddNode(node);
     }
 
     public void RemoveNode(NodeViewModel node)
     {
-        _currentGraph.RemoveNode(node);
+        _currentGraph?.RemoveNode(node);
     }
 
     public void ClearGraph()
     {
-        _currentGraph.Nodes.Clear();
+        _currentGraph?.Clear();
     }
 } 

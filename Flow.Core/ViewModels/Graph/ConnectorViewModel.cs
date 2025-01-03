@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Avalonia;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Flow.ViewModels.Graph;
@@ -12,13 +12,10 @@ public enum ConnectorType
     Output
 }
 
-public partial class ConnectorViewModel : ObservableObject
+public partial class ConnectorViewModel : ViewModelBase
 {
     [ObservableProperty]
     private ConnectorType _type;
-
-    [ObservableProperty]
-    private Point _position;
 
     [ObservableProperty]
     private bool _allowMultipleConnections;
@@ -28,7 +25,7 @@ public partial class ConnectorViewModel : ObservableObject
 
     public bool IsConnected => _connections.Count > 0;
 
-    public ISet<Type> AcceptedTypes { get; } = new HashSet<Type>();
+    public HashSet<Type> AcceptedTypes { get; } = new();
 
     public ConnectorViewModel(ConnectorType type)
     {

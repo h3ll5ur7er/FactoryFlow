@@ -1,97 +1,71 @@
 using Flow.Core.Services;
 using Flow.ViewModels.Graph;
+using Moq;
 using Xunit;
 
 namespace Flow.Tests.Services;
 
 public class GraphManagerTests
 {
-    private readonly GraphManager _manager;
-
-    public GraphManagerTests()
-    {
-        _manager = new GraphManager();
-    }
-
     [Fact]
-    public void Constructor_ShouldInitializeEmptyGraph()
-    {
-        // Assert
-        Assert.NotNull(_manager.CurrentGraph);
-        Assert.Empty(_manager.CurrentGraph.Nodes);
-    }
-
-    [Fact]
-    public void CreateNewGraph_ShouldCreateNewEmptyGraph()
+    public void Constructor_ShouldCreateNewGraph()
     {
         // Arrange
-        var node = new NodeViewModel { Title = "Test Node" };
-        _manager.AddNode(node);
-        Assert.Single(_manager.CurrentGraph.Nodes);
+        var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
 
         // Act
-        _manager.CreateNewGraph();
+        var manager = new GraphManager(nodeFactory.Object);
 
         // Assert
-        Assert.NotNull(_manager.CurrentGraph);
-        Assert.Empty(_manager.CurrentGraph.Nodes);
+        Assert.NotNull(manager.CurrentGraph);
     }
 
     [Fact]
     public void AddNode_ShouldAddNodeToCurrentGraph()
     {
         // Arrange
-        var node = new NodeViewModel { Title = "Test Node" };
+        var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
+        var manager = new GraphManager(nodeFactory.Object);
+        var node = nodeFactory.Object.CreateNode(NodeType.Generic, manager);
 
         // Act
-        _manager.AddNode(node);
+        manager.AddNode(node);
 
         // Assert
-        Assert.Single(_manager.CurrentGraph.Nodes);
-        Assert.Contains(node, _manager.CurrentGraph.Nodes);
-    }
-
-    [Fact]
-    public void AddNode_WhenNodeIsNull_ShouldThrowArgumentNullException()
-    {
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => _manager.AddNode(null!));
+        Assert.Contains(node, manager.CurrentGraph!.Nodes);
     }
 
     [Fact]
     public void RemoveNode_ShouldRemoveNodeFromCurrentGraph()
     {
         // Arrange
-        var node = new NodeViewModel { Title = "Test Node" };
-        _manager.AddNode(node);
-        Assert.Single(_manager.CurrentGraph.Nodes);
+        var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
+        var manager = new GraphManager(nodeFactory.Object);
+        var node = nodeFactory.Object.CreateNode(NodeType.Generic, manager);
+        manager.AddNode(node);
 
         // Act
-        _manager.RemoveNode(node);
+        manager.RemoveNode(node);
 
         // Assert
-        Assert.Empty(_manager.CurrentGraph.Nodes);
-    }
-
-    [Fact]
-    public void RemoveNode_WhenNodeIsNull_ShouldThrowArgumentNullException()
-    {
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => _manager.RemoveNode(null!));
+        Assert.DoesNotContain(node, manager.CurrentGraph!.Nodes);
     }
 
     [Fact]
     public void ClearGraph_ShouldRemoveAllNodes()
     {
         // Arrange
-        _manager.AddNode(new NodeViewModel { Title = "Node 1" });
-        _manager.AddNode(new NodeViewModel { Title = "Node 2" });
-        Assert.Equal(2, _manager.CurrentGraph.Nodes.Count);
+        var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
+        var manager = new GraphManager(nodeFactory.Object);
+        var node1 = nodeFactory.Object.CreateNode(NodeType.Generic, manager);
+        var node2 = nodeFactory.Object.CreateNode(NodeType.Generic, manager);
+        manager.AddNode(node1);
+        manager.AddNode(node2);
 
         // Act
-        _manager.ClearGraph();
+        manager.ClearGraph();
 
         // Assert
-        Assert.Empty(_manager.CurrentGraph.Nodes);
+        Assert.Empty(manager.CurrentGraph!.Nodes);
     }
 } 

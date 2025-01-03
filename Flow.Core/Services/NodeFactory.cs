@@ -1,3 +1,5 @@
+using System;
+using Avalonia;
 using Flow.Core.Models;
 using Flow.ViewModels.Graph;
 
@@ -5,17 +7,46 @@ namespace Flow.Core.Services;
 
 public class NodeFactory : INodeFactory
 {
-    public NodeViewModel CreateNode(NodeType type)
+    public NodeViewModel CreateNode(NodeType type, IGraphManager graphManager)
     {
-        return new NodeViewModel
+        var node = new NodeViewModel(graphManager)
         {
+            Title = $"New {type} Node",
             NodeType = type,
-            Title = $"New {type} Node"
+            Position = new Point(100, 100)
         };
+
+        switch (type)
+        {
+            case NodeType.Generic:
+                node.AddInputConnector(new ConnectorViewModel(ConnectorType.Input));
+                node.AddOutputConnector(new ConnectorViewModel(ConnectorType.Output));
+                break;
+            case NodeType.Splerger:
+                node.AddInputConnector(new ConnectorViewModel(ConnectorType.Input));
+                node.AddOutputConnector(new ConnectorViewModel(ConnectorType.Output));
+                node.AddOutputConnector(new ConnectorViewModel(ConnectorType.Output));
+                break;
+        }
+
+        return node;
     }
 
-    public RecipeNodeViewModel CreateRecipeNode(Recipe recipe)
+    public RecipeNodeViewModel CreateRecipeNode(Recipe recipe, IGraphManager graphManager)
     {
-        return new RecipeNodeViewModel(recipe);
+        if (recipe == null)
+            throw new ArgumentNullException(nameof(recipe));
+
+        var node = new RecipeNodeViewModel(graphManager)
+        {
+            Title = $"New Recipe Node",
+            Recipe = recipe,
+            Position = new Point(100, 100)
+        };
+
+        node.AddInputConnector(new ConnectorViewModel(ConnectorType.Input));
+        node.AddOutputConnector(new ConnectorViewModel(ConnectorType.Output));
+
+        return node;
     }
 } 

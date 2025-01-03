@@ -1,5 +1,6 @@
 using System;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Flow.ViewModels.Graph;
 
@@ -35,6 +36,17 @@ public partial class NodeView : UserControl
                 Console.WriteLine($"NodeView: DataContext set to {DataContext?.GetType().Name ?? "null"}");
             }
         };
+    }
+
+    protected override void OnPointerPressed(PointerPressedEventArgs e)
+    {
+        if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
+        {
+            // Let the right-click event bubble up to show the context menu
+            return;
+        }
+        
+        base.OnPointerPressed(e);
     }
 
     private void InitializeComponent()

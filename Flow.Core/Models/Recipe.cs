@@ -2,12 +2,17 @@ namespace Flow.Core.Models;
 
 public class Recipe
 {
-    public string Identifier { get; }
-    public string DisplayName { get; }
-    public IReadOnlyCollection<ItemStack> Inputs { get; }
-    public IReadOnlyCollection<ItemStack> Outputs { get; }
-    public Machine Machine { get; }
-    public TimeSpan ProcessingTime { get; }
+    public virtual string Identifier { get; protected set; }
+    public virtual string DisplayName { get; protected set; }
+    public virtual IReadOnlyCollection<ItemStack> Inputs { get; protected set; }
+    public virtual IReadOnlyCollection<ItemStack> Outputs { get; protected set; }
+    public virtual Machine Machine { get; protected set; }
+    public virtual TimeSpan ProcessingTime { get; protected set; }
+
+    protected Recipe()
+    {
+        // Protected constructor for mocking
+    }
 
     public Recipe(
         string identifier,

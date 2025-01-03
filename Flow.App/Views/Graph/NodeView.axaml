@@ -14,6 +14,11 @@
             MinWidth="150"
             MinHeight="100"
             BoxShadow="0 2 4 0 #40000000">
+        <Border.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="Delete" Command="{Binding DeleteCommand}" />
+            </ContextMenu>
+        </Border.ContextMenu>
         <Grid RowDefinitions="Auto,*">
             <!-- Header -->
             <Border Grid.Row="0"

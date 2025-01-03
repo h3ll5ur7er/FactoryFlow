@@ -21,6 +21,13 @@
                         Background="Transparent"
                         Width="{Binding $parent[ScrollViewer].Bounds.Width}"
                         Height="{Binding $parent[ScrollViewer].Bounds.Height}">
+                    <Canvas.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Add Recipe Node" Command="{Binding AddRecipeNodeCommand}" />
+                            <MenuItem Header="Add Generic Node" Command="{Binding AddGenericNodeCommand}" />
+                            <MenuItem Header="Add Splerger Node" Command="{Binding AddSplergerNodeCommand}" />
+                        </ContextMenu>
+                    </Canvas.ContextMenu>
                     <ItemsControl Name="NodesItemsControl"
                                 ItemsSource="{Binding Nodes}"
                                 Width="{Binding $parent[Canvas].Bounds.Width}"

@@ -50,7 +50,7 @@ public class UIActionManager : IUIActionManager
 
     public Task AddNodeAsync(Point position)
     {
-        var node = _nodeFactory.CreateNode(NodeType.Generic);
+        var node = _nodeFactory.CreateNode(NodeType.Generic, _graphManager);
         node.Position = position;
         _graphManager.AddNode(node);
         return Task.CompletedTask;
@@ -58,7 +58,7 @@ public class UIActionManager : IUIActionManager
 
     public Task DeleteSelectedNodesAsync()
     {
-        var selectedNode = _graphManager.CurrentGraph.SelectedNode;
+        var selectedNode = _graphManager.CurrentGraph?.SelectedNode;
         if (selectedNode != null)
         {
             _graphManager.RemoveNode(selectedNode);

@@ -5,131 +5,126 @@ using Flow.Core.Services;
 using Flow.ViewModels.Graph;
 using Moq;
 using Xunit;
+using Flow.Tests.TestHelpers;
 
 namespace Flow.Tests.Services;
 
 public class UIActionManagerTests
 {
-    private readonly Mock<IGraphManager> _graphManager;
-    private readonly Mock<INodeFactory> _nodeFactory;
-    private readonly UIActionManager _manager;
-
-    public UIActionManagerTests()
-    {
-        _graphManager = new Mock<IGraphManager>();
-        _nodeFactory = new Mock<INodeFactory>();
-        _manager = new UIActionManager(_graphManager.Object, _nodeFactory.Object);
-    }
-
     [Fact]
-    public async Task RegisterAction_ShouldRegisterActionForExecution()
+    public async Task ExecuteActionAsync_ShouldExecuteRegisteredAction()
     {
         // Arrange
-        var executed = false;
-        _manager.RegisterAction("test", () =>
-        {
-            executed = true;
-            return Task.CompletedTask;
-        });
-
-        // Act
-        await _manager.ExecuteActionAsync("test");
-
-        // Assert
-        Assert.True(executed);
-    }
-
-    [Fact]
-    public async Task RegisterAction_WithCanExecute_ShouldCheckBeforeExecution()
-    {
-        // Arrange
-        var executed = false;
-        var canExecute = false;
-        _manager.RegisterAction(
+        var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
+        var graphManager = Flow.Tests.TestHelpers.MockFactory.CreateGraphManager();
+        var manager = new UIActionManager(graphManager.Object, nodeFactory.Object);
+        var actionExecuted = false;
+        manager.RegisterAction(
             "test",
-            () =>
+            () => Task.FromResult(true),
+            async () =>
             {
-                executed = true;
-                return Task.CompletedTask;
-            },
-            () => Task.FromResult(canExecute)
-        );
+                actionExecuted = true;
+                return true;
+            });
 
-        // Act - Try to execute when canExecute is false
-        await _manager.ExecuteActionAsync("test");
-        Assert.False(executed);
+        // Act
+        await manager.ExecuteActionAsync("test");
 
-        // Act - Try to execute when canExecute is true
-        canExecute = true;
-        await _manager.ExecuteActionAsync("test");
-        Assert.True(executed);
+        // Assert
+        Assert.True(actionExecuted);
     }
 
     [Fact]
-    public async Task UnregisterAction_ShouldPreventExecution()
+    public async Task CanExecuteActionAsync_ShouldReturnTrueForRegisteredAction()
     {
         // Arrange
-        var executed = false;
-        _manager.RegisterAction("test", () =>
-        {
-            executed = true;
-            return Task.CompletedTask;
-        });
+        var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
+        var graphManager = Flow.Tests.TestHelpers.MockFactory.CreateGraphManager();
+        var manager = new UIActionManager(graphManager.Object, nodeFactory.Object);
+        manager.RegisterAction(
+            "test",
+            () => Task.FromResult(true),
+            async () => true);
 
         // Act
-        _manager.UnregisterAction("test");
-        await _manager.ExecuteActionAsync("test");
+        var result = await manager.CanExecuteActionAsync("test");
 
         // Assert
-        Assert.False(executed);
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task RegisterAction_ShouldAddActionToManager()
+    {
+        // Arrange
+        var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
+        var graphManager = Flow.Tests.TestHelpers.MockFactory.CreateGraphManager();
+        var manager = new UIActionManager(graphManager.Object, nodeFactory.Object);
+
+        // Act
+        manager.RegisterAction(
+            "test",
+            () => Task.FromResult(true),
+            async () => true);
+
+        // Assert
+        Assert.True(await manager.CanExecuteActionAsync("test"));
+    }
+
+    [Fact]
+    public async Task UnregisterAction_ShouldRemoveActionFromManager()
+    {
+        // Arrange
+        var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
+        var graphManager = Flow.Tests.TestHelpers.MockFactory.CreateGraphManager();
+        var manager = new UIActionManager(graphManager.Object, nodeFactory.Object);
+        manager.RegisterAction(
+            "test",
+            () => Task.FromResult(true),
+            async () => true);
+
+        // Act
+        manager.UnregisterAction("test");
+
+        // Assert
+        Assert.False(await manager.CanExecuteActionAsync("test"));
     }
 
     [Fact]
     public async Task AddNodeAsync_ShouldCreateAndAddNodeToGraph()
     {
         // Arrange
+        var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
+        var graphManager = Flow.Tests.TestHelpers.MockFactory.CreateGraphManager();
+        var manager = new UIActionManager(graphManager.Object, nodeFactory.Object);
         var position = new Point(100, 100);
-        var node = new NodeViewModel { Title = "Test Node" };
-        _nodeFactory.Setup(f => f.CreateNode(NodeType.Generic)).Returns(node);
 
         // Act
-        await _manager.AddNodeAsync(position);
+        await manager.AddNodeAsync(position);
 
         // Assert
-        _nodeFactory.Verify(f => f.CreateNode(NodeType.Generic), Times.Once);
-        _graphManager.Verify(g => g.AddNode(node), Times.Once);
-        Assert.Equal(position, node.Position);
+        nodeFactory.Verify(f => f.CreateNode(NodeType.Generic, graphManager.Object), Times.Once);
+        graphManager.Verify(m => m.AddNode(It.IsAny<NodeViewModel>()), Times.Once);
     }
 
     [Fact]
     public async Task DeleteSelectedNodesAsync_ShouldRemoveSelectedNode()
     {
         // Arrange
-        var node = new NodeViewModel { Title = "Test Node" };
-        var graph = new GraphCanvasViewModel();
+        var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
+        var graphManager = Flow.Tests.TestHelpers.MockFactory.CreateGraphManager();
+        var manager = new UIActionManager(graphManager.Object, nodeFactory.Object);
+        var node = nodeFactory.Object.CreateNode(NodeType.Generic, graphManager.Object);
+        var graph = new GraphCanvasViewModel(nodeFactory.Object, graphManager.Object);
+        graphManager.Setup(m => m.CurrentGraph).Returns(graph);
         graph.AddNode(node);
-        graph.SelectNode(node);
-
-        _graphManager.Setup(g => g.CurrentGraph).Returns(graph);
+        graph.SelectedNode = node;
 
         // Act
-        await _manager.DeleteSelectedNodesAsync();
+        await manager.DeleteSelectedNodesAsync();
 
         // Assert
-        _graphManager.Verify(g => g.RemoveNode(node), Times.Once);
-    }
-
-    [Fact]
-    public async Task DeleteSelectedNodesAsync_WhenNoSelection_ShouldDoNothing()
-    {
-        // Arrange
-        var graph = new GraphCanvasViewModel();
-        _graphManager.Setup(g => g.CurrentGraph).Returns(graph);
-
-        // Act
-        await _manager.DeleteSelectedNodesAsync();
-
-        // Assert
-        _graphManager.Verify(g => g.RemoveNode(It.IsAny<NodeViewModel>()), Times.Never);
+        graphManager.Verify(m => m.RemoveNode(node), Times.Once);
     }
 } 

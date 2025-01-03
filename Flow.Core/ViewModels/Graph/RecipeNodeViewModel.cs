@@ -2,67 +2,26 @@ using System;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Flow.Core.Models;
+using Flow.Core.Services;
 
 namespace Flow.ViewModels.Graph;
 
-public partial class RecipeNodeViewModel : NodeViewModel
+public class RecipeNodeViewModel : NodeViewModel
 {
-    private Recipe _recipe = null!;
+    private Recipe _recipe;
     public Recipe Recipe
     {
         get => _recipe;
         set
         {
             if (value == null)
-                throw new ArgumentNullException(nameof(value));
-
-            // Disconnect all existing connectors
-            foreach (var connector in InputConnectors.ToList())
-            {
-                connector.DisconnectAll();
-            }
-            foreach (var connector in OutputConnectors.ToList())
-            {
-                connector.DisconnectAll();
-            }
-
-            InputConnectors.Clear();
-            OutputConnectors.Clear();
-
-            _recipe = value;
-            Title = value.DisplayName;
-            
-            // Create new connectors for inputs
-            foreach (var input in value.Inputs)
-            {
-                var connector = new ConnectorViewModel(ConnectorType.Input)
-                {
-                    AllowMultipleConnections = false
-                };
-                connector.AcceptedTypes.Add(input.Item.GetType());
-                AddInputConnector(connector);
-            }
-            
-            // Create new connectors for outputs
-            foreach (var output in value.Outputs)
-            {
-                var connector = new ConnectorViewModel(ConnectorType.Output)
-                {
-                    AllowMultipleConnections = true
-                };
-                connector.AcceptedTypes.Add(output.Item.GetType());
-                AddOutputConnector(connector);
-            }
+                throw new System.ArgumentNullException(nameof(value));
+            SetProperty(ref _recipe, value);
         }
     }
 
-    public RecipeNodeViewModel(Recipe recipe)
-        : base()
+    public RecipeNodeViewModel(IGraphManager graphManager) : base(graphManager)
     {
-        if (recipe == null)
-            throw new ArgumentNullException(nameof(recipe));
-
         NodeType = NodeType.Recipe;
-        Recipe = recipe;
     }
 } 

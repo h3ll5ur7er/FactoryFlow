@@ -27,6 +27,12 @@ public partial class MainWindow : Window
             var graphManager = services.GetRequiredService<IGraphManager>();
             var nodeFactory = services.GetRequiredService<INodeFactory>();
 
+            if (graphManager == null || nodeFactory == null)
+            {
+                Console.WriteLine("ERROR: Required services not found!");
+                return;
+            }
+
             Console.WriteLine($"GraphManager: {graphManager != null}");
             Console.WriteLine($"NodeFactory: {nodeFactory != null}");
 
@@ -43,13 +49,16 @@ public partial class MainWindow : Window
                 TimeSpan.FromSeconds(1));
 
             // Create a test node
-            var node = nodeFactory.CreateRecipeNode(recipe);
+            var node = nodeFactory.CreateRecipeNode(recipe, graphManager);
             node.Position = new Avalonia.Point(100, 100);
             Console.WriteLine($"Created node: {node.Title} at position {node.Position}");
 
             // Add node to graph
             graphManager.AddNode(node);
-            Console.WriteLine($"Added node to graph. Node count: {graphManager.CurrentGraph.Nodes.Count}");
+            if (graphManager.CurrentGraph != null)
+            {
+                Console.WriteLine($"Added node to graph. Node count: {graphManager.CurrentGraph.Nodes.Count}");
+            }
 
             // Set DataContext
             this.DataContext = graphManager.CurrentGraph;
