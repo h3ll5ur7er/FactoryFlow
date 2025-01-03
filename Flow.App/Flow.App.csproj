@@ -24,5 +24,14 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Flow.Core\Flow.Core.csproj" />
+    <ProjectReference Include="..\Flow.Games.TestGame\Flow.Games.TestGame.csproj" />
   </ItemGroup>
+
+  <Target Name="CopyPlugins" AfterTargets="Build">
+    <PropertyGroup>
+      <PluginsDir>$(OutputPath)plugins</PluginsDir>
+    </PropertyGroup>
+    <MakeDir Directories="$(PluginsDir)" />
+    <Copy SourceFiles="$(OutputPath)Flow.Games.TestGame.dll" DestinationFolder="$(PluginsDir)" />
+  </Target>
 </Project>
