@@ -17,21 +17,21 @@
 ## 2. Graph System
 
 ### 2.1 Base Components
-- [ ] Create base `Node` class/interface
-- [ ] Implement `Connector` system with type variations
-- [ ] Develop connection validation logic
+- [x] Create base `Node` class/interface *(Completed: NodeViewModel base class implemented)*
+- [x] Implement `Connector` system with type variations *(Completed: ConnectorViewModel with input/output types)*
+- [x] Develop connection validation logic *(Completed: Type checking and validation rules)*
 - [ ] Implement basic graph traversal
 
 ### 2.2 Node Types
-- [ ] Implement `RecipeNode` with dynamic connectors
-- [ ] Create `SplergerNode` for flow control
+- [x] Implement `RecipeNode` with dynamic connectors *(Completed: RecipeNodeViewModel with dynamic connectors)*
+- [x] Create `SplergerNode` for flow control *(Completed: Basic implementation)*
 - [ ] Develop `SubGraphNode` with nested graph support
-- [ ] Add node position management
+- [x] Add node position management *(Completed: Drag-and-drop positioning)*
 
 ### 2.3 Connection System
-- [ ] Implement connection validation rules
-- [ ] Add support for multiple connections per connector
-- [ ] Create connection type compatibility system
+- [x] Implement connection validation rules *(Completed: Type compatibility checking)*
+- [x] Add support for multiple connections per connector *(Completed)*
+- [x] Create connection type compatibility system *(Completed: Item type validation)*
 - [ ] Implement connection serialization
 
 ## 3. Plugin System
@@ -51,8 +51,8 @@
 ## 4. Calculation Engine
 
 ### 4.1 Basic Calculations
-- [ ] Implement throughput calculation for single node
-- [ ] Add support for node multipliers
+- [x] Implement throughput calculation for single node *(Completed: Basic multiplier support)*
+- [x] Add support for node multipliers *(Completed: UI and logic implementation)*
 - [ ] Create resource requirement calculator
 - [ ] Implement power consumption tracking
 
@@ -80,15 +80,15 @@
 
 ### 6.1 Basic UI
 - [x] Create main window layout *(Completed: Basic MVVM setup)*
-- [ ] Implement node visualization
-- [ ] Add connector visualization
-- [ ] Create connection rendering
+- [x] Implement node visualization *(Completed: Basic node rendering)*
+- [x] Add connector visualization *(Completed: Input/output connectors)*
+- [x] Create connection rendering *(Completed: Basic connection lines)*
 
 ### 6.2 Interaction
-- [ ] Implement node drag-and-drop
-- [ ] Add connection creation interface
+- [x] Implement node drag-and-drop *(Completed: Basic drag-and-drop)*
+- [x] Add connection creation interface *(Completed: Click-and-drag connections)*
 - [ ] Create node property editor
-- [ ] Implement graph navigation
+- [x] Implement graph navigation *(Completed: Pan and zoom)*
 
 ### 6.3 Advanced UI Features
 - [ ] Add visual feedback for invalid connections
@@ -96,39 +96,58 @@
 - [ ] Create SubGraph navigation interface
 - [ ] Add plugin management UI
 
+## Next Priority Tasks
+
+1. **Graph System Completion**
+   - Implement SubGraph node functionality
+   - Complete connection serialization
+   - Finish graph traversal implementation
+
+2. **Calculation Engine**
+   - Implement resource requirement calculator
+   - Add power consumption tracking
+   - Develop graph-wide calculations
+
+3. **File Management**
+   - Design and implement JSON schema
+   - Add save/load functionality
+   - Implement graph export/import
+
+4. **UI Polish**
+   - Add node property editor
+   - Implement visual feedback for invalid connections
+   - Create SubGraph navigation interface
+
 ## Dependencies
 
 ### Core Domain Models
-- No dependencies, can be implemented first
+- ✅ Completed
 
 ### Graph System
-- Depends on Core Domain Models
+- 🟨 Mostly complete, missing SubGraph support
 
 ### Plugin System
-- Depends on Core Domain Models
-- Partially depends on Graph System for node types
+- ✅ Core completed
+- 🟨 Missing hot-reload and custom resource types
 
 ### Calculation Engine
-- Depends on Core Domain Models
-- Depends on Graph System
-- Depends on Plugin System for game data
+- 🟨 Basic calculations implemented
+- ❌ Advanced features pending
 
 ### File Management
-- Depends on Core Domain Models
-- Depends on Graph System
-- Depends on Plugin System references
+- ❌ Not started
 
 ### UI Implementation
-- Depends on all other systems
-- Should be implemented last
+- ✅ Basic functionality complete
+- 🟨 Advanced features pending
 
 ## Implementation Order
-1. Core Domain Models *(Completed)*
-2. Graph System *(Next up)*
-3. Plugin System *(Core completed)*
-4. Calculation Engine
-5. File Management
-6. UI Implementation *(Basic setup completed)*
+1. ✅ Core Domain Models *(Completed)*
+2. 🟨 Graph System *(90% complete)*
+3. ✅ Plugin System *(Core completed)*
+4. 🟨 Calculation Engine *(In progress)*
+5. ❌ File Management *(Not started)*
+6. 🟨 UI Implementation *(Basic setup completed)*
 
 Each task should:
 - Start with a failing test (except UI tasks)
