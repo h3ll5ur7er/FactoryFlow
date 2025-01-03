@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Flow.Core.Models;
 
 namespace Flow.ViewModels.Graph;
 
@@ -19,6 +20,12 @@ public partial class ConnectorViewModel : ViewModelBase
 
     [ObservableProperty]
     private bool _allowMultipleConnections;
+
+    [ObservableProperty]
+    private string _title = string.Empty;
+
+    [ObservableProperty]
+    private Item? _itemType;
 
     private readonly ObservableCollection<ConnectorViewModel> _connections = new();
     public IReadOnlyCollection<ConnectorViewModel> Connections => _connections;

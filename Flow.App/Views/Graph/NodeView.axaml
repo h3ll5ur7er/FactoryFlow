@@ -39,29 +39,35 @@
                             Margin="0,4">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Width="16" Height="16"
-                                    Background="#4D4D4D"
-                                    BorderBrush="#6D6D6D"
-                                    BorderThickness="1"
-                                    CornerRadius="8"
-                                    Margin="4" />
+                            <StackPanel Orientation="Horizontal" Margin="4">
+                                <Border Width="16" Height="16"
+                                        Background="#4D4D4D"
+                                        BorderBrush="#6D6D6D"
+                                        BorderThickness="1"
+                                        CornerRadius="8" />
+                                <TextBlock Text="{Binding Title}"
+                                         VerticalAlignment="Center"
+                                         Margin="4,0,0,0"
+                                         Foreground="#CCCCCC" />
+                            </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <!-- Node Content -->
-                <StackPanel Grid.Column="1"
-                          Margin="8,4">
-                    <TextBlock Text="{Binding NodeType}"
-                               Foreground="#CCCCCC"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Multiplier, StringFormat='x{0}'}"
-                               Foreground="#CCCCCC"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"
-                               Margin="0,4,0,0" />
-                </StackPanel>
+                <!-- Content -->
+                <Border Grid.Column="1"
+                        Background="#2D2D2D"
+                        BorderBrush="#3D3D3D"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Margin="8,4">
+                    <Grid Margin="8,4">
+                        <TextBlock Text="{Binding Title}"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center"
+                                 Foreground="#CCCCCC" />
+                    </Grid>
+                </Border>
 
                 <!-- Output Connectors -->
                 <ItemsControl Grid.Column="2"
@@ -69,12 +75,17 @@
                             Margin="0,4">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Width="16" Height="16"
-                                    Background="#4D4D4D"
-                                    BorderBrush="#6D6D6D"
-                                    BorderThickness="1"
-                                    CornerRadius="8"
-                                    Margin="4" />
+                            <StackPanel Orientation="Horizontal" Margin="4">
+                                <TextBlock Text="{Binding Title}"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,4,0"
+                                         Foreground="#CCCCCC" />
+                                <Border Width="16" Height="16"
+                                        Background="#4D4D4D"
+                                        BorderBrush="#6D6D6D"
+                                        BorderThickness="1"
+                                        CornerRadius="8" />
+                            </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
