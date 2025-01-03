@@ -1,17 +1,15 @@
-using Flow.Core.Models;
-using Flow.Core.Models.Graph;
-using Xunit.Abstractions;
+using System;
+using System.Collections.Generic;
 
-namespace Flow.Tests.Models.Graph;
+namespace Flow.Core.Models.Graph;
 
 /// <summary>
-/// A simple implementation of IConnector for testing purposes.
+/// Represents a connector on a node that can be connected to other connectors.
 /// </summary>
-public class TestConnector : IConnector
+public class Connector : IConnector
 {
     private readonly List<IConnection> _connections = new();
     private readonly List<Item> _acceptedItems = new();
-    private readonly ITestOutputHelper? _output;
 
     public string Identifier { get; }
     public string DisplayName { get; }
@@ -21,21 +19,36 @@ public class TestConnector : IConnector
     public IReadOnlyCollection<Item> AcceptedItems => _acceptedItems.AsReadOnly();
     public IReadOnlyCollection<IConnection> Connections => _connections.AsReadOnly();
 
-    public TestConnector(
+    /// <summary>
+    /// Creates a new connector.
+    /// </summary>
+    /// <param name="identifier">The unique identifier of the connector.</param>
+    /// <param name="displayName">The display name of the connector.</param>
+    /// <param name="parent">The node that owns this connector.</param>
+    /// <param name="isInput">Whether this is an input connector.</param>
+    /// <param name="allowsMultipleConnections">Whether this connector allows multiple connections.</param>
+    /// <param name="acceptedItems">The items that this connector accepts. If empty, accepts any item.</param>
+    /// <exception cref="ArgumentException">Thrown when identifier or displayName is invalid.</exception>
+    /// <exception cref="ArgumentNullException">Thrown when parent is null.</exception>
+    public Connector(
         string identifier,
         string displayName,
         INode parent,
         bool isInput,
         bool allowsMultipleConnections,
-        IEnumerable<Item>? acceptedItems = null,
-        ITestOutputHelper? output = null)
+        IEnumerable<Item>? acceptedItems = null)
     {
+        if (string.IsNullOrWhiteSpace(identifier))
+            throw new ArgumentException("Identifier cannot be empty.", nameof(identifier));
+            
+        if (string.IsNullOrWhiteSpace(displayName))
+            throw new ArgumentException("Display name cannot be empty.", nameof(displayName));
+
         Identifier = identifier;
         DisplayName = displayName;
-        Parent = parent;
+        Parent = parent ?? throw new ArgumentNullException(nameof(parent));
         IsInput = isInput;
         AllowsMultipleConnections = allowsMultipleConnections;
-        _output = output;
 
         if (acceptedItems != null)
             _acceptedItems.AddRange(acceptedItems);
@@ -45,21 +58,12 @@ public class TestConnector : IConnector
     {
         ArgumentNullException.ThrowIfNull(connection);
 
-        if (!AllowsMultipleConnections && _connections.Any())
+        if (!AllowsMultipleConnections && _connections.Count > 0)
             throw new InvalidOperationException($"Connector '{Identifier}' does not allow multiple connections.");
 
         if ((IsInput && connection.Target != this) || (!IsInput && connection.Source != this))
             throw new ArgumentException("Connection does not reference this connector correctly.");
 
-        _connections.Add(connection);
-    }
-
-    /// <summary>
-    /// Adds a connection without validation, for testing invalid states.
-    /// </summary>
-    public void ForceAddConnection(IConnection connection)
-    {
-        ArgumentNullException.ThrowIfNull(connection);
         _connections.Add(connection);
     }
 
@@ -75,41 +79,25 @@ public class TestConnector : IConnector
 
         // Cannot connect to self
         if (other == this)
-        {
-            _output?.WriteLine($"[{Identifier}] Cannot connect to self");
             return false;
-        }
 
         // Cannot connect input to input or output to output
         if (IsInput == other.IsInput)
-        {
-            _output?.WriteLine($"[{Identifier}] Cannot connect {(IsInput ? "input" : "output")} to {(other.IsInput ? "input" : "output")}");
             return false;
-        }
 
         // If either connector accepts no items, they can connect
         if (!AcceptedItems.Any() || !other.AcceptedItems.Any())
             return true;
 
         // Check if there are any compatible item types
-        var hasCompatibleItems = AcceptedItems.Intersect(other.AcceptedItems).Any();
-        if (!hasCompatibleItems)
-        {
-            _output?.WriteLine($"[{Identifier}] No compatible item types with {other.Identifier}");
-            return false;
-        }
-
-        return true;
+        return AcceptedItems.Intersect(other.AcceptedItems).Any();
     }
 
     public bool ValidateConnections()
     {
         // Validate number of connections
         if (!AllowsMultipleConnections && Connections.Count > 1)
-        {
-            _output?.WriteLine($"[{Identifier}] Too many connections: {Connections.Count}");
             return false;
-        }
 
         // Validate each connection
         foreach (var connection in Connections)
@@ -119,29 +107,18 @@ public class TestConnector : IConnector
             var isTarget = connection.Target == this;
             
             if (!isSource && !isTarget)
-            {
-                _output?.WriteLine($"[{Identifier}] Not referenced in connection");
                 return false;
-            }
 
             // Check if the connection direction matches the connector type
             if (IsInput && !isTarget)
-            {
-                _output?.WriteLine($"[{Identifier}] Input connector not used as target");
                 return false;
-            }
+                
             if (!IsInput && !isSource)
-            {
-                _output?.WriteLine($"[{Identifier}] Output connector not used as source");
                 return false;
-            }
 
             // Validate the connection itself
             if (!connection.Validate())
-            {
-                _output?.WriteLine($"[{Identifier}] Connection validation failed");
                 return false;
-            }
         }
 
         return true;

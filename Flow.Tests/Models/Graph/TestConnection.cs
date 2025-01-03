@@ -5,6 +5,7 @@ namespace Flow.Tests.Models.Graph;
 
 /// <summary>
 /// A simple implementation of IConnection for testing purposes.
+/// This implementation allows creating invalid states for testing validation.
 /// </summary>
 public class TestConnection : IConnection
 {
@@ -23,9 +24,17 @@ public class TestConnection : IConnection
         IsEnabled = true;
         _output = output;
 
-        // Add this connection to both connectors
-        source.AddConnection(this);
-        target.AddConnection(this);
+        // For testing, we directly add to the connectors' internal lists
+        // This bypasses validation to allow testing invalid states
+        if (source is TestConnector testSource)
+            testSource.ForceAddConnection(this);
+        else if (source is Connector realSource)
+            realSource.AddConnection(this);
+
+        if (target is TestConnector testTarget)
+            testTarget.ForceAddConnection(this);
+        else if (target is Connector realTarget)
+            realTarget.AddConnection(this);
     }
 
     public bool Validate()
@@ -66,5 +75,6 @@ public class TestConnection : IConnection
     {
         Source.RemoveConnection(this);
         Target.RemoveConnection(this);
+        IsEnabled = false;
     }
 } 
