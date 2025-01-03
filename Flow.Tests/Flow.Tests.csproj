@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Flow.Core\Flow.Core.csproj" />
     <ProjectReference Include="..\Flow.App\Flow.App.csproj" />
+    <ProjectReference Include="..\Flow.Games.TestGame\Flow.Games.TestGame.csproj" />
   </ItemGroup>
 
 </Project>

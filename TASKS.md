@@ -3,15 +3,15 @@
 ## 1. Core Domain Models
 
 ### 1.1 Basic Types
-- [ ] Implement `Item` class with identifier and display name
-- [ ] Create `ItemStack` class to represent item quantities
-- [ ] Develop `Machine` class with basic properties
-- [ ] Create base interfaces for all core types
+- [x] Implement `Item` class with identifier and display name *(Completed: Basic implementation with validation)*
+- [x] Create `ItemStack` class to represent item quantities *(Completed: Includes arithmetic operators)*
+- [x] Develop `Machine` class with basic properties *(Completed: Includes power consumption)*
+- [x] Create base interfaces for all core types *(Completed: Core interfaces established)*
 
 ### 1.2 Recipe System
-- [ ] Implement `Recipe` class with inputs/outputs
-- [ ] Add processing time and power consumption
-- [ ] Create recipe validation logic
+- [x] Implement `Recipe` class with inputs/outputs *(Completed: Full implementation with validation)*
+- [x] Add processing time and power consumption *(Completed: Added to Recipe and Machine)*
+- [x] Create recipe validation logic *(Completed: Validates items and machines)*
 - [ ] Implement recipe efficiency calculations
 
 ## 2. Graph System
@@ -37,15 +37,15 @@
 ## 3. Plugin System
 
 ### 3.1 Core Plugin Infrastructure
-- [ ] Create plugin interfaces
-- [ ] Implement plugin discovery mechanism
-- [ ] Add plugin validation
-- [ ] Create plugin loading system
+- [x] Create plugin interfaces *(Completed: IGamePlugin with core functionality)*
+- [x] Implement plugin discovery mechanism *(Completed: Dynamic loading from DLLs)*
+- [x] Add plugin validation *(Completed: Validates game data integrity)*
+- [x] Create plugin loading system *(Completed: PluginLoader with error handling)*
 
 ### 3.2 Plugin Features
-- [ ] Implement game data loading
+- [x] Implement game data loading *(Completed: Items, Machines, Recipes)*
 - [ ] Add custom resource type support
-- [ ] Create plugin version management
+- [x] Create plugin version management *(Completed: Basic versioning support)*
 - [ ] Implement plugin hot-reload support
 
 ## 4. Calculation Engine
@@ -79,7 +79,7 @@
 ## 6. UI Implementation
 
 ### 6.1 Basic UI
-- [ ] Create main window layout
+- [x] Create main window layout *(Completed: Basic MVVM setup)*
 - [ ] Implement node visualization
 - [ ] Add connector visualization
 - [ ] Create connection rendering
@@ -123,12 +123,12 @@
 - Should be implemented last
 
 ## Implementation Order
-1. Core Domain Models
-2. Graph System
-3. Plugin System
+1. Core Domain Models *(Completed)*
+2. Graph System *(Next up)*
+3. Plugin System *(Core completed)*
 4. Calculation Engine
 5. File Management
-6. UI Implementation
+6. UI Implementation *(Basic setup completed)*
 
 Each task should:
 - Start with a failing test (except UI tasks)
