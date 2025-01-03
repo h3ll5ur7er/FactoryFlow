@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Flow.ViewModels.Graph"
+             xmlns:views="using:Flow.App.Views.Graph"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Flow.App.Views.Graph.GraphCanvasView"
+             x:DataType="vm:GraphCanvasViewModel">
+    
+    <Grid Background="#1E1E1E">
+        <!-- Canvas for background grid -->
+        <Canvas Name="GridCanvas" />
+        
+        <!-- Main scrollable canvas with zoom -->
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" 
+                     VerticalScrollBarVisibility="Auto"
+                     AllowAutoHide="True">
+            <Panel>
+                <Canvas Name="NodesCanvas"
+                        Background="Transparent"
+                        Width="{Binding $parent[ScrollViewer].Bounds.Width}"
+                        Height="{Binding $parent[ScrollViewer].Bounds.Height}">
+                    <ItemsControl Name="NodesItemsControl"
+                                ItemsSource="{Binding Nodes}"
+                                Width="{Binding $parent[Canvas].Bounds.Width}"
+                                Height="{Binding $parent[Canvas].Bounds.Height}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="vm:NodeViewModel">
+                                <views:NodeView PointerPressed="OnNodePointerPressed"
+                                              PointerMoved="OnNodePointerMoved"
+                                              PointerReleased="OnNodePointerReleased">
+                                    <views:NodeView.RenderTransform>
+                                        <TranslateTransform X="{Binding Position.X}"
+                                                          Y="{Binding Position.Y}" />
+                                    </views:NodeView.RenderTransform>
+                                </views:NodeView>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Canvas>
+            </Panel>
+        </ScrollViewer>
+    </Grid>
+</UserControl> 

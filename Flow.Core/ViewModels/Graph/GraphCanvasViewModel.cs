@@ -1,12 +1,13 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Flow.ViewModels.Graph;
 
-public partial class GraphCanvasViewModel : ObservableObject
+public partial class GraphCanvasViewModel : ViewModelBase
 {
     [ObservableProperty]
     private double _scale = 1.0;
@@ -25,6 +26,7 @@ public partial class GraphCanvasViewModel : ObservableObject
             throw new ArgumentNullException(nameof(node));
 
         Nodes.Add(node);
+        Debug.WriteLine($"Added node {node.Title} to graph. Node count: {Nodes.Count}");
     }
 
     public bool RemoveNode(NodeViewModel node)
@@ -48,7 +50,9 @@ public partial class GraphCanvasViewModel : ObservableObject
             SelectNode(null);
         }
 
-        return Nodes.Remove(node);
+        var result = Nodes.Remove(node);
+        Debug.WriteLine($"Removed node {node.Title} from graph. Node count: {Nodes.Count}");
+        return result;
     }
 
     public void SelectNode(NodeViewModel? node)
@@ -65,6 +69,13 @@ public partial class GraphCanvasViewModel : ObservableObject
         SelectedNode = node;
 
         if (node != null)
+        {
             node.IsSelected = true;
+            Debug.WriteLine($"Selected node: {node.Title}");
+        }
+        else
+        {
+            Debug.WriteLine("Cleared node selection");
+        }
     }
 } 

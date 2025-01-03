@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Flow.ViewModels;
 
 namespace Flow.ViewModels.Graph;
 
@@ -13,7 +14,7 @@ public enum NodeType
     SubGraph
 }
 
-public partial class NodeViewModel : ObservableObject
+public partial class NodeViewModel : ViewModelBase
 {
     [ObservableProperty]
     private Point _position;
@@ -96,5 +97,11 @@ public partial class NodeViewModel : ObservableObject
             throw new ArgumentNullException(nameof(connector));
 
         return OutputConnectors.Remove(connector);
+    }
+
+    public void SetPosition(double x, double y)
+    {
+        Position = new Point(x, y);
+        OnPropertyChanged(nameof(Position));
     }
 } 

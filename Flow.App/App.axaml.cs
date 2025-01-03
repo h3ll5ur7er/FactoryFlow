@@ -1,16 +1,18 @@
+using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Flow.App.ViewModels;
 using Flow.App.Views;
-using Flow.Core;
+using Flow.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Flow.App;
 
 public partial class App : Application
 {
-    private ServiceProvider? _serviceProvider;
+    public new static App? Current => Application.Current as App;
+    
+    public IServiceProvider? Services { get; private set; }
 
     public override void Initialize()
     {
@@ -19,25 +21,27 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        // Set up dependency injection
+        // Configure services
         var services = new ServiceCollection();
-        
-        // Register core services
-        services.AddCoreServices();
-        
-        // Register view models
-        services.AddTransient<MainWindowViewModel>();
-        
-        _serviceProvider = services.BuildServiceProvider();
+        ConfigureServices(services);
+        Services = services.BuildServiceProvider();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new MainWindow
             {
-                DataContext = _serviceProvider.GetRequiredService<MainWindowViewModel>()
+                DataContext = Services.GetRequiredService<IGraphManager>().CurrentGraph
             };
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void ConfigureServices(IServiceCollection services)
+    {
+        // Register services
+        services.AddSingleton<INodeFactory, NodeFactory>();
+        services.AddSingleton<IGraphManager, GraphManager>();
+        services.AddSingleton<IUIActionManager, UIActionManager>();
     }
 }

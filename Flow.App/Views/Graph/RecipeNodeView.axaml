@@ -1,0 +1,79 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Flow.ViewModels.Graph"
+             mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="150"
+             x:Class="Flow.App.Views.Graph.RecipeNodeView"
+             x:DataType="vm:RecipeNodeViewModel">
+    
+    <Border Background="#2D2D2D"
+            BorderBrush="#3D3D3D"
+            BorderThickness="1"
+            CornerRadius="3"
+            MinWidth="150"
+            MinHeight="100"
+            BoxShadow="0 2 4 0 #40000000">
+        <Grid RowDefinitions="Auto,*">
+            <!-- Header -->
+            <Border Grid.Row="0"
+                    Background="#3D3D3D"
+                    BorderThickness="0 0 0 1"
+                    BorderBrush="#4D4D4D"
+                    Padding="8 4">
+                <TextBlock Text="{Binding Recipe.DisplayName}"
+                         Foreground="White"
+                         FontWeight="Medium" />
+            </Border>
+
+            <!-- Content -->
+            <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto">
+                <!-- Input Connectors -->
+                <ItemsControl Grid.Column="0"
+                            ItemsSource="{Binding InputConnectors}"
+                            Margin="0,4">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Width="16" Height="16"
+                                    Background="#4D4D4D"
+                                    BorderBrush="#6D6D6D"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Margin="4" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Node Content -->
+                <StackPanel Grid.Column="1"
+                          Margin="8,4">
+                    <TextBlock Text="{Binding Recipe.Machine.DisplayName}"
+                               Foreground="#CCCCCC"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Multiplier, StringFormat='x{0}'}"
+                               Foreground="#CCCCCC"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Margin="0,4,0,0" />
+                </StackPanel>
+
+                <!-- Output Connectors -->
+                <ItemsControl Grid.Column="2"
+                            ItemsSource="{Binding OutputConnectors}"
+                            Margin="0,4">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Width="16" Height="16"
+                                    Background="#4D4D4D"
+                                    BorderBrush="#6D6D6D"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Margin="4" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl> 

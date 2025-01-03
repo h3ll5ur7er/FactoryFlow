@@ -1,8 +1,19 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="Flow.App.App"
-             RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+             xmlns:local="using:Flow.App"
+             xmlns:vm="using:Flow.ViewModels.Graph"
+             xmlns:views="using:Flow.App.Views.Graph"
+             x:Class="Flow.App.App">
+
+    <Application.DataTemplates>
+        <DataTemplate DataType="{x:Type vm:NodeViewModel}">
+            <views:NodeView />
+        </DataTemplate>
+        
+        <DataTemplate DataType="{x:Type vm:RecipeNodeViewModel}">
+            <views:NodeView />
+        </DataTemplate>
+    </Application.DataTemplates>
 
     <Application.Styles>
         <FluentTheme />
