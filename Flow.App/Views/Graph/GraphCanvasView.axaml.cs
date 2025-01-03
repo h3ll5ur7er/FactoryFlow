@@ -274,12 +274,12 @@ public partial class GraphCanvasView : UserControl
         // Calculate vertical offset based on the connector's index
         var connectors = connector.Type == ConnectorType.Input ? node.InputConnectors : node.OutputConnectors;
         var index = connectors.IndexOf(connector);
-        var verticalOffset = 32 + (index * 24); // 32px for header, 24px spacing between connectors
+        var verticalOffset = 32 + (index * 24) + 12; // 40px for header, 24px spacing between connectors, 12px for connector center
         
         // Calculate connector position relative to the node
         var connectorOffset = connector.Type == ConnectorType.Input
-            ? new Point(8, verticalOffset) // Left side for inputs, 8px from edge
-            : new Point(nodeWidth - 8, verticalOffset); // Right side for outputs, 8px from edge
+            ? new Point(12, verticalOffset) // Left side for inputs, 8px from edge
+            : new Point(nodeWidth - 12, verticalOffset); // Right side for outputs, 8px from edge
 
         // Return absolute position
         return nodePos + connectorOffset;
@@ -287,10 +287,18 @@ public partial class GraphCanvasView : UserControl
 
     private void UpdateConnectionPath(Point start, Point end)
     {
+        // If dragging from an input connector, swap start and end points
+        if (_dragSourceConnector?.Type == ConnectorType.Input)
+        {
+            var temp = start;
+            start = end;
+            end = temp;
+        }
+
         // Create a new path figure
         var pathFigure = new PathFigure { 
             StartPoint = start,
-            IsClosed = false  // Explicitly set to false to prevent the path from closing
+            IsClosed = false
         };
         
         // Calculate control points for a smooth curve
