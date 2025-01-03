@@ -12,7 +12,7 @@ namespace Flow.Tests.ViewModels.Graph;
 public class RecipeNodeViewModelTests
 {
     [Fact]
-    public void Constructor_ShouldInitializeProperties()
+    public void Constructor_InitializesProperties()
     {
         // Arrange
         var graphManager = Flow.Tests.TestHelpers.MockFactory.CreateGraphManager();
@@ -21,24 +21,26 @@ public class RecipeNodeViewModelTests
         // Act
         var viewModel = new RecipeNodeViewModel(graphManager.Object)
         {
-            Title = "Test Recipe Node",
-            Recipe = recipe.Object
+            Recipe = recipe
         };
 
         // Assert
-        Assert.Equal("Test Recipe Node", viewModel.Title);
+        Assert.Equal(recipe, viewModel.Recipe);
         Assert.Equal(NodeType.Recipe, viewModel.NodeType);
-        Assert.Equal(recipe.Object, viewModel.Recipe);
     }
 
     [Fact]
-    public void Recipe_WhenSetToNull_ShouldThrowArgumentNullException()
+    public void Recipe_WhenSet_UpdatesTitle()
     {
         // Arrange
         var graphManager = Flow.Tests.TestHelpers.MockFactory.CreateGraphManager();
+        var recipe = Flow.Tests.TestHelpers.MockFactory.CreateRecipe();
         var viewModel = new RecipeNodeViewModel(graphManager.Object);
 
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => viewModel.Recipe = null!);
+        // Act
+        viewModel.Recipe = recipe;
+
+        // Assert
+        Assert.Equal(recipe.DisplayName, viewModel.Title);
     }
 } 

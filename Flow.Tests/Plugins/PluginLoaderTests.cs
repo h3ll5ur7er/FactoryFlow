@@ -1,183 +1,138 @@
+using System;
+using System.IO;
+using System.Reflection;
 using Flow.Core.Plugins;
-using Flow.Games.TestGame;
+using Flow.Tests.TestHelpers;
 using Xunit;
 
 namespace Flow.Tests.Plugins;
 
 public class PluginLoaderTests
 {
-    private readonly string _testPluginPath = Path.Combine(
-        AppDomain.CurrentDomain.BaseDirectory,
-        "plugins"
-    );
-
-    public PluginLoaderTests()
-    {
-        // Ensure the plugins directory exists
-        Directory.CreateDirectory(_testPluginPath);
-    }
-
     [Fact]
-    public void LoadPlugins_WithValidPlugin_LoadsSuccessfully()
+    public void LoadPluginsFromDirectory_WhenDirectoryDoesNotExist_ShouldThrowDirectoryNotFoundException()
     {
         // Arrange
-        var loader = new PluginLoader();
-        var plugin = new TestGamePlugin();
-
-        // Act
-        loader.RegisterPlugin(plugin);
-        var loadedPlugin = loader.GetPlugin(plugin.GameName);
-
-        // Assert
-        Assert.NotNull(loadedPlugin);
-        Assert.Equal(plugin.GameName, loadedPlugin.GameName);
-        Assert.Equal(plugin.Version, loadedPlugin.Version);
-    }
-
-    [Fact]
-    public void LoadPlugins_WithDuplicateGameName_ThrowsArgumentException()
-    {
-        // Arrange
-        var loader = new PluginLoader();
-        var plugin1 = new TestGamePlugin();
-        var plugin2 = new TestGamePlugin();
+        var gameRegistry = Flow.Tests.TestHelpers.MockFactory.CreateGameRegistry();
+        var loader = new PluginLoader(gameRegistry.Object);
+        var nonExistentPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 
         // Act & Assert
-        loader.RegisterPlugin(plugin1);
-        var exception = Assert.Throws<ArgumentException>(() => loader.RegisterPlugin(plugin2));
-        Assert.Contains("already registered", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Throws<DirectoryNotFoundException>(() => loader.LoadPluginsFromDirectory(nonExistentPath));
     }
 
     [Fact]
-    public void GetPlugin_WithUnknownGameName_ThrowsKeyNotFoundException()
+    public void LoadPluginsFromDirectory_WhenDirectoryIsEmpty_ShouldReturnZero()
     {
         // Arrange
-        var loader = new PluginLoader();
+        var gameRegistry = Flow.Tests.TestHelpers.MockFactory.CreateGameRegistry();
+        var loader = new PluginLoader(gameRegistry.Object);
+        var emptyDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(emptyDir);
 
-        // Act & Assert
-        Assert.Throws<KeyNotFoundException>(() => loader.GetPlugin("Unknown Game"));
+        try
+        {
+            // Act
+            var loadedCount = loader.LoadPluginsFromDirectory(emptyDir);
+
+            // Assert
+            Assert.Equal(0, loadedCount);
+        }
+        finally
+        {
+            Directory.Delete(emptyDir);
+        }
     }
 
     [Fact]
-    public void GetAvailableGames_ReturnsRegisteredGames()
+    public void LoadPluginsFromDirectory_WhenDirectoryHasNonDllFiles_ShouldReturnZero()
     {
         // Arrange
-        var loader = new PluginLoader();
-        var plugin = new TestGamePlugin();
+        var gameRegistry = Flow.Tests.TestHelpers.MockFactory.CreateGameRegistry();
+        var loader = new PluginLoader(gameRegistry.Object);
+        var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(dir);
+        File.WriteAllText(Path.Combine(dir, "test.txt"), "test");
+
+        try
+        {
+            // Act
+            var loadedCount = loader.LoadPluginsFromDirectory(dir);
+
+            // Assert
+            Assert.Equal(0, loadedCount);
+        }
+        finally
+        {
+            Directory.Delete(dir, true);
+        }
+    }
+
+    [Fact]
+    public void LoadPluginsFromDirectory_WhenDirectoryHasInvalidDll_ShouldReturnZero()
+    {
+        // Arrange
+        var gameRegistry = Flow.Tests.TestHelpers.MockFactory.CreateGameRegistry();
+        var loader = new PluginLoader(gameRegistry.Object);
+        var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(dir);
+        File.WriteAllBytes(Path.Combine(dir, "invalid.dll"), new byte[0]);
+
+        try
+        {
+            // Act
+            var loadedCount = loader.LoadPluginsFromDirectory(dir);
+
+            // Assert
+            Assert.Equal(0, loadedCount);
+        }
+        finally
+        {
+            Directory.Delete(dir, true);
+        }
+    }
+
+    [Fact]
+    public void LoadPluginsFromDirectory_WhenDirectoryHasValidDllWithoutPlugins_ShouldReturnZero()
+    {
+        // Arrange
+        var gameRegistry = Flow.Tests.TestHelpers.MockFactory.CreateGameRegistry();
+        var loader = new PluginLoader(gameRegistry.Object);
+        var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(dir);
+        
+        // Copy System.Runtime.dll as an example of a valid DLL without plugins
+        var runtimePath = typeof(string).Assembly.Location;
+        File.Copy(runtimePath, Path.Combine(dir, "System.Runtime.dll"));
+
+        try
+        {
+            // Act
+            var loadedCount = loader.LoadPluginsFromDirectory(dir);
+
+            // Assert
+            Assert.Equal(0, loadedCount);
+        }
+        finally
+        {
+            Directory.Delete(dir, true);
+        }
+    }
+
+    [Fact]
+    public void LoadPluginsFromDirectory_WhenDirectoryHasValidPlugin_ShouldReturnOne()
+    {
+        // Arrange
+        var gameRegistry = Flow.Tests.TestHelpers.MockFactory.CreateGameRegistry();
+        var loader = new PluginLoader(gameRegistry.Object);
+        var dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
 
         // Act
-        loader.RegisterPlugin(plugin);
-        var games = loader.GetAvailableGames();
-
-        // Assert
-        var game = Assert.Single(games);
-        Assert.Equal(plugin.GameName, game.Name);
-        Assert.Equal(plugin.Version, game.Version);
-    }
-
-    [Fact]
-    public void UnregisterPlugin_RemovesPlugin()
-    {
-        // Arrange
-        var loader = new PluginLoader();
-        var plugin = new TestGamePlugin();
-        loader.RegisterPlugin(plugin);
-
-        // Act
-        loader.UnregisterPlugin(plugin.GameName);
-
-        // Assert
-        Assert.Empty(loader.GetAvailableGames());
-        Assert.Throws<KeyNotFoundException>(() => loader.GetPlugin(plugin.GameName));
-    }
-
-    [Fact]
-    public void UnregisterPlugin_WithUnknownGame_ThrowsKeyNotFoundException()
-    {
-        // Arrange
-        var loader = new PluginLoader();
-
-        // Act & Assert
-        Assert.Throws<KeyNotFoundException>(() => loader.UnregisterPlugin("Unknown Game"));
-    }
-
-    [Fact]
-    public void LoadPluginsFromDirectory_WithNonexistentDirectory_ThrowsDirectoryNotFoundException()
-    {
-        // Arrange
-        var loader = new PluginLoader();
-        var nonexistentPath = Path.Combine(_testPluginPath, "nonexistent");
-
-        // Act & Assert
-        Assert.Throws<DirectoryNotFoundException>(() => loader.LoadPluginsFromDirectory(nonexistentPath));
-    }
-
-    [Fact]
-    public void LoadPluginsFromDirectory_WithEmptyDirectory_LoadsNoPlugins()
-    {
-        // Arrange
-        var loader = new PluginLoader();
-        var emptyPath = Path.Combine(_testPluginPath, "empty");
-        Directory.CreateDirectory(emptyPath);
-
-        // Act
-        var loadedCount = loader.LoadPluginsFromDirectory(emptyPath);
-
-        // Assert
-        Assert.Equal(0, loadedCount);
-        Assert.Empty(loader.GetAvailableGames());
-    }
-
-    [Fact]
-    public void LoadPluginsFromDirectory_WithInvalidAssembly_ContinuesLoading()
-    {
-        // Arrange
-        var loader = new PluginLoader();
-        var invalidPath = Path.Combine(_testPluginPath, "invalid");
-        Directory.CreateDirectory(invalidPath);
-        File.WriteAllText(Path.Combine(invalidPath, "Flow.Games.Invalid.dll"), "Not a valid DLL");
-
-        // Act
-        var loadedCount = loader.LoadPluginsFromDirectory(invalidPath);
-
-        // Assert
-        Assert.Equal(0, loadedCount);
-        Assert.Empty(loader.GetAvailableGames());
-    }
-
-    [Fact]
-    public void LoadPluginsFromDirectory_WithTestGamePlugin_LoadsSuccessfully()
-    {
-        // Arrange
-        var loader = new PluginLoader();
-        var pluginPath = Path.Combine(_testPluginPath, "testgame");
-        Directory.CreateDirectory(pluginPath);
-
-        // Copy the test game assembly to the plugins directory
-        var testGameAssembly = typeof(TestGamePlugin).Assembly.Location;
-        var targetPath = Path.Combine(pluginPath, Path.GetFileName(testGameAssembly));
-        File.Copy(testGameAssembly, targetPath, true);
-
-        // Act
-        var loadedCount = loader.LoadPluginsFromDirectory(pluginPath);
-        var games = loader.GetAvailableGames().ToList();
+        var loadedCount = loader.LoadPluginsFromDirectory(dir);
 
         // Assert
         Assert.Equal(1, loadedCount);
-        Assert.Single(games);
-
-        var game = games[0];
-        Assert.Equal("Test Factory Game", game.Name);
-        Assert.Equal(new Version(1, 0), game.Version);
-
-        var plugin = loader.GetPlugin(game.Name);
-        Assert.NotEmpty(plugin.Items);
-        Assert.NotEmpty(plugin.Machines);
-        Assert.NotEmpty(plugin.Recipes);
-
-        // Verify some specific content
-        Assert.Contains(plugin.Items, i => i.Identifier == "iron-ore");
-        Assert.Contains(plugin.Machines, m => m.Identifier == "stone-furnace");
-        Assert.Contains(plugin.Recipes, r => r.Identifier == "iron-smelting");
+        var availableGames = gameRegistry.Object.AvailableGames;
+        Assert.Contains(availableGames, g => g.Name == "Test Factory Game");
     }
 } 

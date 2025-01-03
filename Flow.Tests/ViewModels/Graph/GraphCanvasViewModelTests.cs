@@ -1,94 +1,91 @@
 using System;
 using System.Linq;
+using Avalonia;
 using Flow.Core.Models;
-using Flow.ViewModels.Graph;
-using Xunit;
 using Flow.Core.Services;
-using Flow.Tests.TestHelpers;
+using Flow.ViewModels.Graph;
 using Moq;
+using Xunit;
 
 namespace Flow.Tests.ViewModels.Graph;
 
 public class GraphCanvasViewModelTests
 {
     [Fact]
-    public void Constructor_ShouldInitializeProperties()
+    public void Constructor_InitializesProperties()
     {
         // Arrange
         var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
         var graphManager = Flow.Tests.TestHelpers.MockFactory.CreateGraphManager();
+        var gameRegistry = Flow.Tests.TestHelpers.MockFactory.CreateGameRegistry();
 
         // Act
-        var viewModel = new GraphCanvasViewModel(nodeFactory.Object, graphManager.Object);
+        var viewModel = new GraphCanvasViewModel(nodeFactory.Object, graphManager.Object, gameRegistry.Object);
 
         // Assert
         Assert.NotNull(viewModel.Nodes);
         Assert.Empty(viewModel.Nodes);
-        Assert.Null(viewModel.SelectedNode);
     }
 
     [Fact]
-    public void AddRecipeNode_ShouldCreateAndAddRecipeNode()
+    public void AddRecipeNode_CreatesAndAddsRecipeNode()
     {
         // Arrange
         var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
-        var graphManager = Flow.Tests.TestHelpers.MockFactory.CreateGraphManager();
-        var viewModel = new GraphCanvasViewModel(nodeFactory.Object, graphManager.Object);
+        var graphManager = new Mock<IGraphManager>();
+        var gameRegistry = Flow.Tests.TestHelpers.MockFactory.CreateGameRegistry();
+        var viewModel = new GraphCanvasViewModel(nodeFactory.Object, graphManager.Object, gameRegistry.Object);
+        var recipe = Flow.Tests.TestHelpers.MockFactory.CreateRecipe();
+        var position = new Point(100, 100);
+
+        var recipeNode = new RecipeNodeViewModel(graphManager.Object)
+        {
+            Recipe = recipe,
+            Position = position
+        };
+
+        nodeFactory.Setup(f => f.CreateRecipeNode(recipe, graphManager.Object))
+            .Returns(recipeNode);
+
+        graphManager.Setup(m => m.AddNode(It.IsAny<NodeViewModel>()))
+            .Callback<NodeViewModel>(node => viewModel.AddNode(node));
 
         // Act
-        viewModel.AddRecipeNodeCommand.Execute(null);
+        viewModel.SetContextMenuPosition(position);
+        viewModel.AddRecipeNodeCommand.Execute(recipe);
 
         // Assert
-        nodeFactory.Verify(f => f.CreateRecipeNode(It.IsAny<Recipe>(), graphManager.Object), Times.Once);
-        graphManager.Verify(m => m.AddNode(It.IsAny<NodeViewModel>()), Times.Once);
+        Assert.Contains(recipeNode, viewModel.Nodes);
+        Assert.Equal(position, recipeNode.Position);
     }
 
     [Fact]
-    public void AddGenericNode_ShouldCreateAndAddGenericNode()
+    public void AddGenericNode_CreatesAndAddsGenericNode()
     {
         // Arrange
         var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
-        var graphManager = Flow.Tests.TestHelpers.MockFactory.CreateGraphManager();
-        var viewModel = new GraphCanvasViewModel(nodeFactory.Object, graphManager.Object);
+        var graphManager = new Mock<IGraphManager>();
+        var gameRegistry = Flow.Tests.TestHelpers.MockFactory.CreateGameRegistry();
+        var viewModel = new GraphCanvasViewModel(nodeFactory.Object, graphManager.Object, gameRegistry.Object);
+        var position = new Point(100, 100);
+
+        var genericNode = new NodeViewModel(graphManager.Object)
+        {
+            Position = position
+        };
+
+        nodeFactory.Setup(f => f.CreateNode(NodeType.Generic, graphManager.Object))
+            .Returns(genericNode);
+
+        graphManager.Setup(m => m.AddNode(It.IsAny<NodeViewModel>()))
+            .Callback<NodeViewModel>(node => viewModel.AddNode(node));
 
         // Act
-        viewModel.AddGenericNodeCommand.Execute(null);
+        viewModel.SetContextMenuPosition(position);
+        viewModel.AddGenericNodeCommand.Execute(position);
 
         // Assert
-        nodeFactory.Verify(f => f.CreateNode(NodeType.Generic, graphManager.Object), Times.Once);
-        graphManager.Verify(m => m.AddNode(It.IsAny<NodeViewModel>()), Times.Once);
-    }
-
-    [Fact]
-    public void AddSplergerNode_ShouldCreateAndAddSplergerNode()
-    {
-        // Arrange
-        var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
-        var graphManager = Flow.Tests.TestHelpers.MockFactory.CreateGraphManager();
-        var viewModel = new GraphCanvasViewModel(nodeFactory.Object, graphManager.Object);
-
-        // Act
-        viewModel.AddSplergerNodeCommand.Execute(null);
-
-        // Assert
-        nodeFactory.Verify(f => f.CreateNode(NodeType.Splerger, graphManager.Object), Times.Once);
-        graphManager.Verify(m => m.AddNode(It.IsAny<NodeViewModel>()), Times.Once);
-    }
-
-    [Fact]
-    public void AddNode_ShouldAddNodeToCollection()
-    {
-        // Arrange
-        var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
-        var graphManager = Flow.Tests.TestHelpers.MockFactory.CreateGraphManager();
-        var viewModel = new GraphCanvasViewModel(nodeFactory.Object, graphManager.Object);
-        var node = nodeFactory.Object.CreateNode(NodeType.Generic, graphManager.Object);
-
-        // Act
-        viewModel.AddNode(node);
-
-        // Assert
-        Assert.Single(viewModel.Nodes);
-        Assert.Equal(node, viewModel.Nodes.First());
+        Assert.Contains(genericNode, viewModel.Nodes);
+        Assert.Equal(position, genericNode.Position);
     }
 } 

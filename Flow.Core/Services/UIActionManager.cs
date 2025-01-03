@@ -29,12 +29,14 @@ public class UIActionManager : IUIActionManager
 
     public async Task ExecuteActionAsync(string actionName)
     {
-        if (_actions.TryGetValue(actionName, out var action))
+        if (!_actions.TryGetValue(actionName, out var action))
         {
-            if (action.CanExecute == null || await action.CanExecute())
-            {
-                await action.Action();
-            }
+            throw new KeyNotFoundException($"Action '{actionName}' not found.");
+        }
+
+        if (action.CanExecute == null || await action.CanExecute())
+        {
+            await action.Action();
         }
     }
 
@@ -45,7 +47,10 @@ public class UIActionManager : IUIActionManager
 
     public void UnregisterAction(string actionName)
     {
-        _actions.Remove(actionName);
+        if (!_actions.Remove(actionName))
+        {
+            throw new KeyNotFoundException($"Action '{actionName}' not found.");
+        }
     }
 
     public Task AddNodeAsync(Point position)

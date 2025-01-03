@@ -1,6 +1,6 @@
 using Flow.Core.Services;
+using Flow.Tests.TestHelpers;
 using Flow.ViewModels.Graph;
-using Moq;
 using Xunit;
 
 namespace Flow.Tests.Services;
@@ -8,64 +8,70 @@ namespace Flow.Tests.Services;
 public class GraphManagerTests
 {
     [Fact]
-    public void Constructor_ShouldCreateNewGraph()
+    public void AddNode_AddsNodeToGraph()
     {
         // Arrange
-        var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
+        var nodeFactory = MockFactory.CreateNodeFactory();
+        var gameRegistry = MockFactory.CreateGameRegistry();
+        var graphManager = new GraphManager(nodeFactory.Object, gameRegistry.Object);
+        var node = new NodeViewModel(graphManager);
 
         // Act
-        var manager = new GraphManager(nodeFactory.Object);
+        graphManager.AddNode(node);
 
         // Assert
-        Assert.NotNull(manager.CurrentGraph);
+        Assert.Contains(node, graphManager.CurrentGraph.Nodes);
     }
 
     [Fact]
-    public void AddNode_ShouldAddNodeToCurrentGraph()
+    public void RemoveNode_RemovesNodeFromGraph()
     {
         // Arrange
-        var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
-        var manager = new GraphManager(nodeFactory.Object);
-        var node = nodeFactory.Object.CreateNode(NodeType.Generic, manager);
+        var nodeFactory = MockFactory.CreateNodeFactory();
+        var gameRegistry = MockFactory.CreateGameRegistry();
+        var graphManager = new GraphManager(nodeFactory.Object, gameRegistry.Object);
+        var node = new NodeViewModel(graphManager);
+        graphManager.AddNode(node);
 
         // Act
-        manager.AddNode(node);
+        graphManager.RemoveNode(node);
 
         // Assert
-        Assert.Contains(node, manager.CurrentGraph!.Nodes);
+        Assert.DoesNotContain(node, graphManager.CurrentGraph.Nodes);
     }
 
     [Fact]
-    public void RemoveNode_ShouldRemoveNodeFromCurrentGraph()
+    public void ClearGraph_RemovesAllNodes()
     {
         // Arrange
-        var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
-        var manager = new GraphManager(nodeFactory.Object);
-        var node = nodeFactory.Object.CreateNode(NodeType.Generic, manager);
-        manager.AddNode(node);
+        var nodeFactory = MockFactory.CreateNodeFactory();
+        var gameRegistry = MockFactory.CreateGameRegistry();
+        var graphManager = new GraphManager(nodeFactory.Object, gameRegistry.Object);
+        var node1 = new NodeViewModel(graphManager);
+        var node2 = new NodeViewModel(graphManager);
+        graphManager.AddNode(node1);
+        graphManager.AddNode(node2);
 
         // Act
-        manager.RemoveNode(node);
+        graphManager.ClearGraph();
 
         // Assert
-        Assert.DoesNotContain(node, manager.CurrentGraph!.Nodes);
+        Assert.Empty(graphManager.CurrentGraph.Nodes);
     }
 
     [Fact]
-    public void ClearGraph_ShouldRemoveAllNodes()
+    public void CurrentGraph_ReturnsGraphCanvasViewModel()
     {
         // Arrange
-        var nodeFactory = Flow.Tests.TestHelpers.MockFactory.CreateNodeFactory();
-        var manager = new GraphManager(nodeFactory.Object);
-        var node1 = nodeFactory.Object.CreateNode(NodeType.Generic, manager);
-        var node2 = nodeFactory.Object.CreateNode(NodeType.Generic, manager);
-        manager.AddNode(node1);
-        manager.AddNode(node2);
+        var nodeFactory = MockFactory.CreateNodeFactory();
+        var gameRegistry = MockFactory.CreateGameRegistry();
+        var graphManager = new GraphManager(nodeFactory.Object, gameRegistry.Object);
 
         // Act
-        manager.ClearGraph();
+        var graph = graphManager.CurrentGraph;
 
         // Assert
-        Assert.Empty(manager.CurrentGraph!.Nodes);
+        Assert.NotNull(graph);
+        Assert.IsType<GraphCanvasViewModel>(graph);
     }
 } 

@@ -17,6 +17,7 @@ public class RecipeNodeViewModel : NodeViewModel
             if (value == null)
                 throw new System.ArgumentNullException(nameof(value));
             SetProperty(ref _recipe, value);
+            Title = value.DisplayName;
         }
     }
 
