@@ -83,6 +83,7 @@ public partial class NodeViewModel : ViewModelBase
         if (connector.Type != ConnectorType.Input)
             throw new ArgumentException("Connector must be an input type", nameof(connector));
 
+        Console.WriteLine($"[NodeViewModel] Adding input connector: {connector.DisplayName} to {Title}");
         InputConnectors.Add(connector);
     }
 
@@ -94,6 +95,7 @@ public partial class NodeViewModel : ViewModelBase
         if (connector.Type != ConnectorType.Output)
             throw new ArgumentException("Connector must be an output type", nameof(connector));
 
+        Console.WriteLine($"[NodeViewModel] Adding output connector: {connector.DisplayName} to {Title}");
         OutputConnectors.Add(connector);
     }
 

@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Flow.Core.Models;
 
 namespace Flow.ViewModels.Graph;
 
@@ -13,6 +14,7 @@ public partial class ConnectorViewModel : ObservableObject
 {
     private readonly NodeViewModel _node;
     private readonly ObservableCollection<ConnectionViewModel> _connections = new();
+    private readonly ObservableCollection<Item> _acceptedItems = new();
 
     [ObservableProperty]
     private string _identifier;
@@ -28,9 +30,10 @@ public partial class ConnectorViewModel : ObservableObject
 
     public NodeViewModel Node => _node;
     public IReadOnlyCollection<ConnectionViewModel> Connections => _connections;
+    public IReadOnlyCollection<Item> AcceptedItems => _acceptedItems;
     public bool IsConnected => _connections.Count > 0;
 
-    public ConnectorViewModel(string identifier, string displayName, NodeViewModel node, ConnectorType type, bool allowsMultipleConnections)
+    public ConnectorViewModel(string identifier, string displayName, NodeViewModel node, ConnectorType type, bool allowsMultipleConnections, IEnumerable<Item>? acceptedItems = null)
     {
         if (string.IsNullOrWhiteSpace(identifier))
             throw new ArgumentException("Identifier cannot be empty", nameof(identifier));
@@ -46,6 +49,14 @@ public partial class ConnectorViewModel : ObservableObject
         _node = node;
         _type = type;
         _allowsMultipleConnections = allowsMultipleConnections;
+
+        if (acceptedItems != null)
+        {
+            foreach (var item in acceptedItems)
+            {
+                _acceptedItems.Add(item);
+            }
+        }
     }
 
     public bool CanConnectTo(ConnectorViewModel other)
@@ -66,7 +77,12 @@ public partial class ConnectorViewModel : ObservableObject
         if (!AllowsMultipleConnections && IsConnected) return false;
         if (!other.AllowsMultipleConnections && other.IsConnected) return false;
 
-        return true;
+        // If either connector accepts no items, they can connect
+        if (!AcceptedItems.Any() || !other.AcceptedItems.Any())
+            return true;
+
+        // Check if there are any compatible item types
+        return AcceptedItems.Intersect(other.AcceptedItems).Any();
     }
 
     public void AddConnection(ConnectionViewModel connection)
@@ -94,6 +110,16 @@ public partial class ConnectorViewModel : ObservableObject
 
         // Check if multiple connections are allowed
         if (!AllowsMultipleConnections && IsConnected) return false;
+
+        // Get the other connector
+        var otherConnector = connection.Source == this ? connection.Target : connection.Source;
+
+        // Check item type compatibility
+        if (AcceptedItems.Any() && otherConnector.AcceptedItems.Any())
+        {
+            if (!AcceptedItems.Intersect(otherConnector.AcceptedItems).Any())
+                return false;
+        }
 
         return true;
     }

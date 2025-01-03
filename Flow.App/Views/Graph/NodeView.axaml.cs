@@ -17,19 +17,19 @@ public partial class NodeView : UserControl
         {
             if (DataContext is NodeViewModel node)
             {
-                Console.WriteLine($"NodeView: DataContext set to NodeViewModel:");
-                Console.WriteLine($"  - Title: {node.Title}");
-                Console.WriteLine($"  - Position: {node.Position}");
-                Console.WriteLine($"  - NodeType: {node.NodeType}");
-                Console.WriteLine($"  - Size: {node.Size}");
-                Console.WriteLine($"  - IsSelected: {node.IsSelected}");
-                Console.WriteLine($"  - Input Connectors: {node.InputConnectors.Count}");
-                Console.WriteLine($"  - Output Connectors: {node.OutputConnectors.Count}");
+                // Console.WriteLine($"NodeView: DataContext set to NodeViewModel:");
+                // Console.WriteLine($"  - Title: {node.Title}");
+                // Console.WriteLine($"  - Position: {node.Position}");
+                // Console.WriteLine($"  - NodeType: {node.NodeType}");
+                // Console.WriteLine($"  - Size: {node.Size}");
+                // Console.WriteLine($"  - IsSelected: {node.IsSelected}");
+                // Console.WriteLine($"  - Input Connectors: {node.InputConnectors.Count}");
+                // Console.WriteLine($"  - Output Connectors: {node.OutputConnectors.Count}");
                 
-                if (node is RecipeNodeViewModel recipeNode)
-                {
-                    Console.WriteLine($"  - Recipe: {recipeNode.Recipe.DisplayName}");
-                }
+                // if (node is RecipeNodeViewModel recipeNode)
+                // {
+                //     Console.WriteLine($"  - Recipe: {recipeNode.Recipe.DisplayName}");
+                // }
             }
             else
             {

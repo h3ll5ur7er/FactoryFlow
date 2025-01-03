@@ -44,34 +44,6 @@ public class NodeFactory : INodeFactory
             Position = new Point(100, 100)
         };
 
-        // Add input connectors for each input item
-        var inputIndex = 0;
-        foreach (var input in recipe.Inputs)
-        {
-            var connector = new ConnectorViewModel(
-                $"input{inputIndex}",
-                input.Item.DisplayName,
-                node,
-                ConnectorType.Input,
-                false);
-            node.AddInputConnector(connector);
-            inputIndex++;
-        }
-
-        // Add output connectors for each output item
-        var outputIndex = 0;
-        foreach (var output in recipe.Outputs)
-        {
-            var connector = new ConnectorViewModel(
-                $"output{outputIndex}",
-                output.Item.DisplayName,
-                node,
-                ConnectorType.Output,
-                true);
-            node.AddOutputConnector(connector);
-            outputIndex++;
-        }
-
         return node;
     }
 } 

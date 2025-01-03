@@ -47,37 +47,39 @@ public partial class GraphCanvasView : UserControl
             StrokeDashArray = null // Ensure no dash pattern
         };
 
-        _dragPath.DataContextChanged += OnDragPathDataContextChanged;
-        _dragPath.PropertyChanged += OnDragPathPropertyChanged;
 
         DataContextChanged += OnDataContextChanged;
     }
 
     private void OnConnectionPathChanged(object? sender, EventArgs e)
     {
-        Console.WriteLine("ConnectionPath Changed:");
-        Console.WriteLine($"  Figures count: {_connectionPath.Figures.Count}");
-        if (_connectionPath.Figures.Count > 0)
+        if (_connectionPath == null)
         {
-            var figure = _connectionPath.Figures[0];
-            Console.WriteLine($"  First figure - StartPoint: {figure.StartPoint}, IsClosed: {figure.IsClosed}");
-            Console.WriteLine($"  Segments count: {figure.Segments.Count}");
+            Console.WriteLine("Warning: _connectionPath is null");
+            return;
         }
-    }
 
-    private void OnDragPathDataContextChanged(object? sender, EventArgs e)
-    {
-        Console.WriteLine("DragPath DataContext Changed");
-        Console.WriteLine($"  IsVisible: {_dragPath.IsVisible}");
-        Console.WriteLine($"  Has Data: {_dragPath.Data != null}");
-    }
-
-    private void OnDragPathPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        Console.WriteLine($"DragPath Property Changed: {e.Property.Name}");
-        Console.WriteLine($"  Old Value: {e.OldValue}");
-        Console.WriteLine($"  New Value: {e.NewValue}");
-        Console.WriteLine($"  IsVisible: {_dragPath.IsVisible}");
+        Console.WriteLine("ConnectionPath Changed:");
+        var figures = _connectionPath.Figures;
+        if (figures == null)
+        {
+            Console.WriteLine("Warning: Figures collection is null");
+            return;
+        }
+        Console.WriteLine($"  Figures count: {figures.Count}");
+        if (figures.Count > 0)
+        {
+            var figure = figures[0];
+            if (figure != null)
+            {
+                var segments = figure.Segments;
+                if (segments != null)
+                {
+                    Console.WriteLine($"  First figure - StartPoint: {figure.StartPoint}, IsClosed: {figure.IsClosed}");
+                    Console.WriteLine($"  Segments count: {segments.Count}");
+                }
+            }
+        }
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -219,6 +221,10 @@ public partial class GraphCanvasView : UserControl
         var controlPoint1 = sourcePos + new Point(controlPointOffset, 0);
         var controlPoint2 = targetPos - new Point(controlPointOffset, 0);
 
+        if (pathFigure.Segments == null)
+        {
+            pathFigure.Segments = new PathSegments();
+        }
         pathFigure.Segments.Add(new BezierSegment
         {
             Point1 = controlPoint1,
@@ -226,6 +232,10 @@ public partial class GraphCanvasView : UserControl
             Point3 = targetPos
         });
 
+        if (pathGeometry.Figures == null)
+        {
+            pathGeometry.Figures = new PathFigures();
+        }
         pathGeometry.Figures.Add(pathFigure);
 
         return new Path
@@ -310,6 +320,10 @@ public partial class GraphCanvasView : UserControl
         var controlPoint1 = start + new Point(controlPointOffset, 0);
         var controlPoint2 = end - new Point(controlPointOffset, 0);
         
+        if (pathFigure.Segments == null)
+        {
+            pathFigure.Segments = new PathSegments();
+        }
         pathFigure.Segments.Add(new BezierSegment
         {
             Point1 = controlPoint1,
@@ -321,15 +335,19 @@ public partial class GraphCanvasView : UserControl
 
         // Create a new PathGeometry to ensure change notification
         var newGeometry = new PathGeometry();
+        if (newGeometry.Figures == null)
+        {
+            newGeometry.Figures = new PathFigures();
+        }
         newGeometry.Figures.Add(pathFigure);
-        _dragPath.Data = newGeometry;
-        
-        // Ensure the path is visible and updated
-        _dragPath.IsVisible = true;
-        _dragPath.InvalidateVisual();
-        _dragPath.StrokeLineCap = PenLineCap.Round;
-        _dragPath.StrokeThickness = 2;
-        _dragPath.Stroke = new SolidColorBrush(Color.FromRgb(102, 102, 102));
+        if (_dragPath != null)
+        {
+            _dragPath.Data = newGeometry;
+            
+            // Ensure the path is visible and updated
+            _dragPath.IsVisible = true;
+            _dragPath.InvalidateVisual();
+        }
     }
 
     public void StartConnectionDrag(ConnectorViewModel sourceConnector, PointerPressedEventArgs e)
@@ -351,12 +369,18 @@ public partial class GraphCanvasView : UserControl
         Console.WriteLine("  Setting drag path visible");
 
         // Reset and initialize the drag path
-        _connectionPath.Figures.Clear();
-        _dragPath.IsVisible = true;
-        _dragPath.StrokeThickness = 2;
-        _dragPath.Stroke = new SolidColorBrush(Color.FromRgb(102, 102, 102));
-        _dragPath.StrokeLineCap = PenLineCap.Round;
-        _dragPath.StrokeDashArray = null;
+        if (_connectionPath?.Figures != null)
+        {
+            _connectionPath.Figures.Clear();
+        }
+        if (_dragPath != null)
+        {
+            _dragPath.IsVisible = true;
+            _dragPath.StrokeThickness = 2;
+            _dragPath.Stroke = new SolidColorBrush(Color.FromRgb(102, 102, 102));
+            _dragPath.StrokeLineCap = PenLineCap.Round;
+            _dragPath.StrokeDashArray = null;
+        }
 
         // Update the connection path
         UpdateConnectionPath(sourcePos, _dragCurrentPoint);
@@ -403,9 +427,15 @@ public partial class GraphCanvasView : UserControl
         // Reset dragging state
         _dragSourceConnector = null;
         _isDraggingConnection = false;
-        _dragPath.IsVisible = false;
-        _connectionPath.Figures.Clear();
-        _dragPath.InvalidateVisual(); // Force visual update
+        if (_dragPath != null)
+        {
+            _dragPath.IsVisible = false;
+            _dragPath.InvalidateVisual(); // Force visual update
+        }
+        if (_connectionPath?.Figures != null)
+        {
+            _connectionPath.Figures.Clear();
+        }
     }
 
     private ConnectorViewModel? FindConnectorAtPoint(Point point)

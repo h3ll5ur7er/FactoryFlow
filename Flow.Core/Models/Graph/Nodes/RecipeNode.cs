@@ -1,3 +1,5 @@
+using Flow.Core.Models;
+
 namespace Flow.Core.Models.Graph.Nodes;
 
 /// <summary>
@@ -7,9 +9,6 @@ public class RecipeNode : Node
 {
     private decimal _multiplier = 1;
 
-    /// <summary>
-    /// Gets the recipe that this node performs.
-    /// </summary>
     public Recipe Recipe { get; }
 
     /// <summary>
@@ -32,31 +31,40 @@ public class RecipeNode : Node
     /// </summary>
     /// <param name="recipe">The recipe to perform.</param>
     /// <exception cref="ArgumentNullException">Thrown when recipe is null.</exception>
-    public RecipeNode(Recipe recipe)
-        : base($"recipe-{recipe?.Identifier ?? throw new ArgumentNullException(nameof(recipe))}", recipe.DisplayName)
+    public RecipeNode(Recipe recipe) : base($"recipe-{recipe?.Identifier ?? throw new ArgumentNullException(nameof(recipe))}", recipe.DisplayName)
     {
         Recipe = recipe;
 
-        // Create input connectors
+        Console.WriteLine($"[RecipeNode] Creating node for recipe: {recipe.DisplayName}");
+
+        // Create input connectors for each recipe input
         foreach (var input in recipe.Inputs)
         {
-            CreateInput(
+            Console.WriteLine($"[RecipeNode] Creating input connector: {input.Item.DisplayName}");
+            var connector = new Connector(
                 $"input-{input.Item.Identifier}",
                 input.Item.DisplayName,
-                true,  // Allow multiple connections for load balancing
+                this,
+                true,  // isInput
+                true,  // multiple connections allowed for inputs
                 new[] { input.Item }
             );
+            AddInput(connector);
         }
 
-        // Create output connectors
+        // Create output connectors for each recipe output
         foreach (var output in recipe.Outputs)
         {
-            CreateOutput(
+            Console.WriteLine($"[RecipeNode] Creating output connector: {output.Item.DisplayName}");
+            var connector = new Connector(
                 $"output-{output.Item.Identifier}",
                 output.Item.DisplayName,
-                true,  // Allow multiple connections for load balancing
+                this,
+                false,  // isInput
+                true,   // multiple connections allowed for outputs
                 new[] { output.Item }
             );
+            AddOutput(connector);
         }
     }
 

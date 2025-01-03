@@ -30,4 +30,9 @@ public interface IConnection
     /// </summary>
     /// <returns>True if the connection is valid, false otherwise.</returns>
     bool Validate();
+
+    /// <summary>
+    /// Removes this connection from both its source and target connectors.
+    /// </summary>
+    void Remove();
 } 

@@ -6,7 +6,7 @@ namespace Flow.Core.Models.Graph;
 /// <summary>
 /// Base class for nodes in the production flow graph.
 /// </summary>
-public abstract class Node : INode
+public class Node : INode
 {
     private readonly List<IConnector> _inputs = new();
     private readonly List<IConnector> _outputs = new();
@@ -24,13 +24,13 @@ public abstract class Node : INode
     /// <param name="identifier">The unique identifier of the node.</param>
     /// <param name="displayName">The display name of the node.</param>
     /// <exception cref="ArgumentException">Thrown when identifier or displayName is invalid.</exception>
-    protected Node(string identifier, string displayName)
+    public Node(string identifier, string displayName)
     {
         if (string.IsNullOrWhiteSpace(identifier))
-            throw new ArgumentException("Identifier cannot be empty.", nameof(identifier));
+            throw new ArgumentException("Identifier cannot be empty", nameof(identifier));
             
         if (string.IsNullOrWhiteSpace(displayName))
-            throw new ArgumentException("Display name cannot be empty.", nameof(displayName));
+            throw new ArgumentException("Display name cannot be empty", nameof(displayName));
 
         Identifier = identifier;
         DisplayName = displayName;
@@ -42,15 +42,16 @@ public abstract class Node : INode
     /// <param name="connector">The connector to add.</param>
     /// <exception cref="ArgumentNullException">Thrown when connector is null.</exception>
     /// <exception cref="ArgumentException">Thrown when the connector is not an input or belongs to another node.</exception>
-    protected void AddInput(IConnector connector)
+    public void AddInput(IConnector connector)
     {
-        ArgumentNullException.ThrowIfNull(connector);
-
-        if (!connector.IsInput)
-            throw new ArgumentException("Connector must be an input connector.", nameof(connector));
+        if (connector == null)
+            throw new ArgumentNullException(nameof(connector));
             
+        if (!connector.IsInput)
+            throw new ArgumentException("Connector must be an input connector", nameof(connector));
+
         if (connector.Parent != this)
-            throw new ArgumentException("Connector belongs to another node.", nameof(connector));
+            throw new ArgumentException("Connector belongs to another node", nameof(connector));
 
         _inputs.Add(connector);
     }
@@ -60,16 +61,17 @@ public abstract class Node : INode
     /// </summary>
     /// <param name="connector">The connector to add.</param>
     /// <exception cref="ArgumentNullException">Thrown when connector is null.</exception>
-    /// <exception cref="ArgumentException">Thrown when the connector is not an output or belongs to another node.</exception>
-    protected void AddOutput(IConnector connector)
+    /// <exception cref="ArgumentException">Thrown when the connector is an input or belongs to another node.</exception>
+    public void AddOutput(IConnector connector)
     {
-        ArgumentNullException.ThrowIfNull(connector);
-
-        if (connector.IsInput)
-            throw new ArgumentException("Connector must be an output connector.", nameof(connector));
+        if (connector == null)
+            throw new ArgumentNullException(nameof(connector));
             
+        if (connector.IsInput)
+            throw new ArgumentException("Connector must be an output connector", nameof(connector));
+
         if (connector.Parent != this)
-            throw new ArgumentException("Connector belongs to another node.", nameof(connector));
+            throw new ArgumentException("Connector belongs to a different node", nameof(connector));
 
         _outputs.Add(connector);
     }

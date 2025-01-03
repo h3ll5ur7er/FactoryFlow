@@ -38,6 +38,12 @@ public partial class MainWindow : Window
                 TimeSpan.FromSeconds(1));
 
             // Create a test node
+            if (nodeFactory == null || graphManager == null)
+            {
+                Console.WriteLine("Error: nodeFactory or graphManager is null");
+                return;
+            }
+            
             var node = nodeFactory.CreateRecipeNode(recipe, graphManager);
             node.Position = new Avalonia.Point(100, 100);
             Console.WriteLine($"Created node: {node.Title} at position {node.Position}");
